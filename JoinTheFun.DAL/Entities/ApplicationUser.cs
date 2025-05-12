@@ -16,6 +16,9 @@ namespace JoinTheFun.DAL.Entities
         public ICollection<Event> CreatedEvents { get; set; }
         public ICollection<Follow> Followers { get; set; }
         public ICollection<Follow> Following { get; set; }
+        public ICollection<EventParticipant> ParticipatingEvents { get; set; }
+        public ICollection<PostComment> Comments { get; set; }
+        public ICollection<PostLike> PostLikes { get; set; }
     }
 
 }
