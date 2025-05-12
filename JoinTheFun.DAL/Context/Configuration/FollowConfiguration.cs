@@ -13,17 +13,19 @@ namespace JoinTheFun.DAL.Context.Configuration
     {
         public void Configure(EntityTypeBuilder<Follow> builder)
         {
-            builder.HasKey(f => new { f.FollowerId, f.FollowedId }); // Складений ключ для FollowerId та FollowedId
+            builder.HasKey(f => new { f.FollowerId, f.FollowedId })
+                   .IsClustered(false);
+
 
             builder.HasOne(f => f.Follower)
                 .WithMany(u => u.Following)
                 .HasForeignKey(f => f.FollowerId)
-                .OnDelete(DeleteBehavior.Restrict); // При видаленні користувача не видаляються підписки на нього
+                .OnDelete(DeleteBehavior.Restrict); 
 
             builder.HasOne(f => f.Followed)
                 .WithMany(u => u.Followers)
                 .HasForeignKey(f => f.FollowedId)
-                .OnDelete(DeleteBehavior.Restrict); // При видаленні користувача не видаляються його підписники
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

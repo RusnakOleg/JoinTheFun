@@ -13,17 +13,18 @@ namespace JoinTheFun.DAL.Context.Configuration
     {
         public void Configure(EntityTypeBuilder<EventParticipant> builder)
         {
-            builder.HasKey(ep => new { ep.EventId, ep.UserId }); // Складений ключ для EventId та UserId
+            builder.HasKey(ep => new { ep.EventId, ep.UserId })
+                   .IsClustered(false); 
 
             builder.HasOne(ep => ep.Event)
                 .WithMany(e => e.Participants)
                 .HasForeignKey(ep => ep.EventId)
-                .OnDelete(DeleteBehavior.Cascade); // При видаленні події, видаляються учасники
+                .OnDelete(DeleteBehavior.Restrict); 
 
             builder.HasOne(ep => ep.User)
                 .WithMany(u => u.ParticipatingEvents)
                 .HasForeignKey(ep => ep.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // При видаленні користувача, видаляються його участі в подіях
+                .OnDelete(DeleteBehavior.Restrict); 
         }
     }
 }

@@ -22,12 +22,12 @@ namespace JoinTheFun.DAL.Context.Configuration
             builder.HasOne(pc => pc.Post)
                 .WithMany(p => p.Comments)
                 .HasForeignKey(pc => pc.PostId)
-                .OnDelete(DeleteBehavior.Cascade); // При видаленні посту, видаляються всі коментарі
+                .OnDelete(DeleteBehavior.Restrict); // При видаленні посту, видаляються всі коментарі
 
             builder.HasOne(pc => pc.User)
                 .WithMany(u => u.Comments)
                 .HasForeignKey(pc => pc.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // При видаленні користувача, видаляються його коментарі
+                .OnDelete(DeleteBehavior.Restrict); // При видаленні користувача, видаляються його коментарі
         }
     }
 }

@@ -13,17 +13,19 @@ namespace JoinTheFun.DAL.Context.Configuration
     {
         public void Configure(EntityTypeBuilder<PostLike> builder)
         {
-            builder.HasKey(pl => new { pl.PostId, pl.UserId }); // Складений ключ для PostId і UserId
+            builder.HasKey(pl => new { pl.PostId, pl.UserId })
+                   .IsClustered(false);
+
 
             builder.HasOne(pl => pl.Post)
                 .WithMany(p => p.Likes)
                 .HasForeignKey(pl => pl.PostId)
-                .OnDelete(DeleteBehavior.Cascade); // При видаленні посту, видаляються лайки на ньому
+                .OnDelete(DeleteBehavior.Restrict); 
 
             builder.HasOne(pl => pl.User)
                 .WithMany(u => u.PostLikes)
                 .HasForeignKey(pl => pl.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // При видаленні користувача, видаляються його лайки
+                .OnDelete(DeleteBehavior.Restrict); 
         }
     }
 }
