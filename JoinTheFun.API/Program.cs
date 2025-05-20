@@ -1,6 +1,8 @@
 using JoinTheFun.API.Data;
 using JoinTheFun.DAL.Context;
 using JoinTheFun.DAL.Entities;
+using JoinTheFun.DAL.Repositories.Interfaces;
+using JoinTheFun.DAL.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +22,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IInterestRepository, InterestRepository>();
+builder.Services.AddScoped<IUserInterestRepository, UserInterestRepository>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<IPostLikeRepository, PostLikeRepository>();
+builder.Services.AddScoped<IPostCommentRepository, PostCommentRepository>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IEventParticipantRepository, EventParticipantRepository>();
+builder.Services.AddScoped<IFollowRepository, FollowRepository>();
+
 
 
 
