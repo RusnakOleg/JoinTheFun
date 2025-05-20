@@ -36,5 +36,27 @@ namespace JoinTheFun.DAL.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<IEnumerable<Event>> GetByLocationAsync(string location)
+        {
+            return await _context.Events
+                .Where(e => e.Location.ToLower().Contains(location.ToLower()))
+                .Include(e => e.Creator)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Event>> GetByUserInterestsAsync(IEnumerable<int> interestIds)
+        {
+            var userIds = await _context.Profiles
+                .Where(p => p.Interests.Any(i => interestIds.Contains(i.InterestId)))
+                .Select(p => p.UserId)
+                .ToListAsync();
+
+            return await _context.Events
+                .Where(e => userIds.Contains(e.CreatorId))
+                .Include(e => e.Creator)
+                .ToListAsync();
+        }
+
     }
 }

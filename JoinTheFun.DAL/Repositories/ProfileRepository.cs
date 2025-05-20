@@ -29,5 +29,22 @@ namespace JoinTheFun.DAL.Repositories
             _context.Profiles.Update(profile);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Profile>> GetByCityAsync(string city)
+        {
+            return await _context.Profiles
+                .Where(p => p.City.ToLower().Contains(city.ToLower()))
+                .Include(p => p.Interests)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Profile>> GetByInterestIdAsync(int interestId)
+        {
+            return await _context.Profiles
+                .Where(p => p.Interests.Any(i => i.InterestId == interestId))
+                .Include(p => p.Interests)
+                .ToListAsync();
+        }
+
     }
 }

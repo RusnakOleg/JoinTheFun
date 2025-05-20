@@ -12,5 +12,9 @@ namespace JoinTheFun.DAL.Repositories.Interfaces
         Task<Profile?> GetByUserIdAsync(string userId);
         Task AddAsync(Profile profile);
         Task UpdateAsync(Profile profile);
+
+        Task<IEnumerable<Profile>> GetByCityAsync(string city);
+        Task<IEnumerable<Profile>> GetByInterestIdAsync(int interestId);
+
     }
 }

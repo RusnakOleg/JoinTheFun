@@ -13,5 +13,8 @@ namespace JoinTheFun.DAL.Repositories.Interfaces
         Task<Event?> GetByIdAsync(int id);
         Task AddAsync(Event ev);
         Task DeleteAsync(int id);
+        Task<IEnumerable<Event>> GetByLocationAsync(string location);
+        Task<IEnumerable<Event>> GetByUserInterestsAsync(IEnumerable<int> interestIds);
+
     }
 }
