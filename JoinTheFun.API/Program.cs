@@ -1,4 +1,7 @@
+using JoinTheFun.API.Data;
 using JoinTheFun.DAL.Context;
+using JoinTheFun.DAL.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -13,6 +16,11 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 
 
 var app = builder.Build();
@@ -29,5 +37,16 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
+
+    await DataSeeder.SeedAsync(userManager, roleManager, dbContext);
+}
+
 
 app.Run();
