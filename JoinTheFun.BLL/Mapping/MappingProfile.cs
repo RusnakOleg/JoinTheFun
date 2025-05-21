@@ -34,7 +34,11 @@ namespace JoinTheFun.BLL.Mapping
             // Profile
             CreateMap<DAL.Entities.Profile, ProfileDto>()
                 .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender.ToString()))
-                .ForMember(dest => dest.Interests, opt => opt.MapFrom(src => src.Interests.Select(i => i.Interest.Name).ToList()));
+                .ForMember(dest => dest.Interests, opt => opt.MapFrom(src =>
+                src.Interests != null
+                ? src.Interests.Select(i => i.Interest.Name).ToList()
+                : new List<string>()
+                ));
 
             CreateMap<UpdateProfileDto, DAL.Entities.Profile>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null)); // тільки не-null

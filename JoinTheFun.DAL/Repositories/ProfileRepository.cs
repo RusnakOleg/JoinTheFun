@@ -15,8 +15,14 @@ namespace JoinTheFun.DAL.Repositories
         private readonly ApplicationDbContext _context;
         public ProfileRepository(ApplicationDbContext context) => _context = context;
 
-        public async Task<Profile?> GetByUserIdAsync(string userId) =>
-            await _context.Profiles.Include(p => p.Interests).FirstOrDefaultAsync(p => p.UserId == userId);
+        public async Task<Profile?> GetByUserIdAsync(string userId)
+        {
+            return await _context.Profiles
+                .Include(p => p.Interests)
+                    .ThenInclude(ui => ui.Interest) // ⬅ ОБОВ’ЯЗКОВО
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+        }
+
 
         public async Task AddAsync(Profile profile)
         {
