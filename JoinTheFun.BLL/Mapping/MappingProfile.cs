@@ -65,6 +65,8 @@ namespace JoinTheFun.BLL.Mapping
             // EventParticipant
             CreateMap<EventParticipant, EventParticipantDto>();
             CreateMap<EventParticipantDto, EventParticipant>();
+            CreateMap<RemoveEventParticipantDto, EventParticipant>();
+
 
         }
     }

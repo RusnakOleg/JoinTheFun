@@ -11,6 +11,7 @@ namespace JoinTheFun.BLL.Services.Interfaces
     {
         Task<IEnumerable<EventParticipantDto>> GetByEventIdAsync(int eventId);
         Task AddAsync(EventParticipantDto dto);
-        Task RemoveAsync(EventParticipantDto dto);
+        Task RemoveAsync(RemoveEventParticipantDto dto);
+
     }
 }
