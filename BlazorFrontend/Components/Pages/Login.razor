@@ -4,6 +4,14 @@
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
 
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorFrontend.Services.Auth
+
+
+
 @rendermode InteractiveServer
 
 <h3>Вхід</h3>
@@ -39,12 +47,20 @@
         var result = await AuthService.LoginAsync(loginModel);
         if (result != null)
         {
-            // TODO: Зберегти токен у localStorage / AuthStateProvider
-            NavigationManager.NavigateTo("/");
+            await LocalStorage.SetItemAsStringAsync("authToken", result.Token);
+
+            // Оновлення стану авторизації
+            if (AuthStateProvider is CustomAuthStateProvider customAuth)
+            {
+                await customAuth.NotifyUserAuthentication(result.Token);
+            }
+
+            NavigationManager.NavigateTo("/profile");
         }
         else
         {
             message = "Невірне ім'я користувача або пароль";
         }
     }
+
 }

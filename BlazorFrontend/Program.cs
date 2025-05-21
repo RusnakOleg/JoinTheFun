@@ -1,6 +1,11 @@
+using Blazored.LocalStorage;
 using BlazorFrontend.Components;
 using BlazorFrontend.Services;
+using BlazorFrontend.Services.Auth;
 using BlazorFrontend.Services.Interfaces;
+using Microsoft.AspNetCore.Components.Authorization;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +62,10 @@ builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:7038/api/");
 });
+
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 var app = builder.Build();
 
