@@ -33,6 +33,12 @@ namespace BlazorFrontend.Services
         {
             return await _http.GetFromJsonAsync<List<ProfileDto>>($"profile/by-interest?interestId={interestId}");
         }
+
+        public async Task UpdateAsync(UpdateProfileDto dto, string userId)
+        {
+            await _http.PutAsJsonAsync($"profile/{userId}", dto);
+        }
+
     }
 
 }

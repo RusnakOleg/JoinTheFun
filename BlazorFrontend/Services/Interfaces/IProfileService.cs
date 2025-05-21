@@ -10,6 +10,8 @@ namespace BlazorFrontend.Services.Interfaces
 
         Task<List<ProfileDto>> GetByCityAsync(string city);
         Task<List<ProfileDto>> GetByInterestIdAsync(int interestId);
+
+        Task UpdateAsync(UpdateProfileDto dto, string userId); // ← додай це
     }
 
 }
