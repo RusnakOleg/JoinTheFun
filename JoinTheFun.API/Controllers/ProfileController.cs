@@ -15,6 +15,13 @@ namespace JoinTheFun.API.Controllers
             _profileService = profileService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProfileDto>>> GetAll()
+        {
+            var profiles = await _profileService.GetAllAsync();
+            return Ok(profiles);
+        }
+
         /// <summary>
         /// Отримати профіль користувача
         /// </summary>

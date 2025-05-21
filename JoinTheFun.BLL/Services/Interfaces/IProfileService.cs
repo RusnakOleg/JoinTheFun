@@ -14,6 +14,9 @@ namespace JoinTheFun.BLL.Services.Interfaces
         Task<IEnumerable<ProfileDto>> GetByInterestIdAsync(int interestId);
         Task AddAsync(UpdateProfileDto dto, string userId); // створення нового профілю
         Task UpdateAsync(UpdateProfileDto dto, string userId);
+
+        Task<IEnumerable<ProfileDto>> GetAllAsync();
+
     }
 
 }

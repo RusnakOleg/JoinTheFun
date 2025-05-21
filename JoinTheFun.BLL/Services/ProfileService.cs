@@ -55,6 +55,13 @@ namespace JoinTheFun.BLL.Services
             _mapper.Map(dto, profile);
             await _repo.UpdateAsync(profile);
         }
+
+        public async Task<IEnumerable<ProfileDto>> GetAllAsync()
+        {
+            var profiles = await _repo.GetAllAsync();
+            return _mapper.Map<IEnumerable<ProfileDto>>(profiles);
+        }
+
     }
 
 }
