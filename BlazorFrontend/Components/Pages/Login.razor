@@ -1,1 +1,50 @@
-﻿
+﻿@page "/login"
+@using BlazorFrontend.DTO.Login
+@using BlazorFrontend.Services.Interfaces
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+
+<h3>Вхід</h3>
+
+<EditForm Model="loginModel" OnValidSubmit="LoginUser">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Ім'я користувача:</label>
+        <InputText @bind-Value="loginModel.Username" class="form-control" />
+    </div>
+
+    <div>
+        <label>Пароль:</label>
+        <InputText @bind-Value="loginModel.Password" type="password" class="form-control" />
+    </div>
+
+    <button class="btn btn-success mt-2">Увійти</button>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="text-danger mt-2">@message</p>
+    }
+</EditForm>
+
+@code {
+    private LoginDto loginModel = new();
+    private string message = "";
+
+    private async Task LoginUser()
+    {
+        var result = await AuthService.LoginAsync(loginModel);
+        if (result != null)
+        {
+            // TODO: Зберегти токен у localStorage / AuthStateProvider
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            message = "Невірне ім'я користувача або пароль";
+        }
+    }
+}

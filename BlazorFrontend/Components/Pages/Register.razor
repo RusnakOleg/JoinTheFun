@@ -1,39 +1,54 @@
 ﻿@page "/register"
 @using BlazorFrontend.DTO.Register
-@using BlazorFrontend.Services
-@inject AuthService Auth
-@inject NavigationManager Nav
+@using BlazorFrontend.Services.Interfaces
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
 
 <h3>Реєстрація</h3>
 
-<input @bind="Email" placeholder="Email" />
-<input @bind="Username" placeholder="Ім'я користувача" />
-<input @bind="Password" type="password" placeholder="Пароль" />
-<button @onclick="Registerr">Зареєструватись</button>
+<EditForm Model="registerModel" OnValidSubmit="RegisterUser">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-@if (!string.IsNullOrEmpty(Message))
-{
-    <p style="color:red">@Message</p>
-}
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="registerModel.Email" class="form-control" />
+    </div>
+
+    <div>
+        <label>Ім'я користувача:</label>
+        <InputText @bind-Value="registerModel.Username" class="form-control" />
+    </div>
+
+    <div>
+        <label>Пароль:</label>
+        <InputText @bind-Value="registerModel.Password" type="password" class="form-control" />
+    </div>
+
+    <button class="btn btn-primary mt-2">Зареєструватися</button>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="text-danger mt-2">@message</p>
+    }
+</EditForm>
 
 @code {
-    string Email = "";
-    string Username = "";
-    string Password = "";
-    string Message = "";
+    private RegisterDto registerModel = new();
+    private string message = "";
 
-    async Task Registerr()
+    private async Task RegisterUser()
     {
-        var success = await Auth.RegisterAsync(new RegisterDto
-            {
-                Email = Email,
-                Username = Username,
-                Password = Password
-            });
-
+        var success = await AuthService.RegisterAsync(registerModel);
         if (success)
-            Nav.NavigateTo("/login");
+        {
+            NavigationManager.NavigateTo("/login");
+        }
         else
-            Message = "Помилка реєстрації!";
+        {
+            message = "Не вдалося зареєструватися";
+        }
     }
 }
