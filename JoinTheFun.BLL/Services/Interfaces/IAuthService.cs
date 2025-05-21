@@ -1,4 +1,5 @@
-﻿using JoinTheFun.BLL.DTO.Register;
+﻿using JoinTheFun.BLL.DTO.Login;
+using JoinTheFun.BLL.DTO.Register;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace JoinTheFun.BLL.Services.Interfaces
     public interface IAuthService
     {
         Task<bool> RegisterAsync(RegisterDto dto);
+        Task<AuthResponseDto?> LoginAsync(LoginDto dto);
     }
 
 }
