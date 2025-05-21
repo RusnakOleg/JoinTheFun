@@ -5,6 +5,7 @@ using JoinTheFun.DAL.Repositories.Interfaces;
 using JoinTheFun.DAL.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using JoinTheFun.BLL.Mapping;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,7 @@ builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IEventParticipantRepository, EventParticipantRepository>();
 builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 
 
