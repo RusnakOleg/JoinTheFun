@@ -11,5 +11,7 @@ namespace JoinTheFun.DAL.Repositories.Interfaces
     {
         Task<IEnumerable<Interest>> GetAllAsync();
         Task<Interest?> GetByIdAsync(int id);
+        Task AddAsync(Interest interest);
+
     }
 }

@@ -20,5 +20,12 @@ namespace JoinTheFun.DAL.Repositories
 
         public async Task<Interest?> GetByIdAsync(int id) =>
             await _context.Interests.FindAsync(id);
+
+        public async Task AddAsync(Interest interest)
+        {
+            _context.Interests.Add(interest);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
