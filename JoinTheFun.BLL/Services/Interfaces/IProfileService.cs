@@ -10,6 +10,10 @@ namespace JoinTheFun.BLL.Services.Interfaces
     public interface IProfileService
     {
         Task<ProfileDto?> GetByUserIdAsync(string userId);
-        Task UpdateAsync(string userId, UpdateProfileDto dto);
+        Task<IEnumerable<ProfileDto>> GetByCityAsync(string city);
+        Task<IEnumerable<ProfileDto>> GetByInterestIdAsync(int interestId);
+        Task AddAsync(UpdateProfileDto dto, string userId); // створення нового профілю
+        Task UpdateAsync(UpdateProfileDto dto, string userId);
     }
+
 }

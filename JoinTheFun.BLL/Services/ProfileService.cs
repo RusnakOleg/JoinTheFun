@@ -27,11 +27,34 @@ namespace JoinTheFun.BLL.Services
             return _mapper.Map<ProfileDto>(profile);
         }
 
-        public async Task UpdateAsync(string userId, UpdateProfileDto dto)
+        public async Task<IEnumerable<ProfileDto>> GetByCityAsync(string city)
+        {
+            var profiles = await _repo.GetByCityAsync(city);
+            return _mapper.Map<IEnumerable<ProfileDto>>(profiles);
+        }
+
+        public async Task<IEnumerable<ProfileDto>> GetByInterestIdAsync(int interestId)
+        {
+            var profiles = await _repo.GetByInterestIdAsync(interestId);
+            return _mapper.Map<IEnumerable<ProfileDto>>(profiles);
+        }
+
+        public async Task AddAsync(UpdateProfileDto dto, string userId)
+        {
+            var profile = _mapper.Map<JoinTheFun.DAL.Entities.Profile>(dto);
+            profile.UserId = userId;
+
+            await _repo.AddAsync(profile);
+        }
+
+        public async Task UpdateAsync(UpdateProfileDto dto, string userId)
         {
             var profile = await _repo.GetByUserIdAsync(userId);
+            if (profile == null) return;
+
             _mapper.Map(dto, profile);
             await _repo.UpdateAsync(profile);
         }
     }
+
 }
