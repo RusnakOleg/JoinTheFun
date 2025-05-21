@@ -17,6 +17,12 @@ namespace BlazorFrontend.Services
             return await _http.GetFromJsonAsync<List<ProfileDto>>("profile");
         }
 
+        public async Task<ProfileDto?> GetByUserIdAsync(string userId)
+        {
+            return await _http.GetFromJsonAsync<ProfileDto>($"profile/{userId}");
+        }
+
+
 
         public async Task<List<ProfileDto>> GetByCityAsync(string city)
         {
