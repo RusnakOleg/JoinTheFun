@@ -39,18 +39,29 @@ namespace JoinTheFun.DAL.Repositories
         public async Task<IEnumerable<Profile>> GetByCityAsync(string city)
         {
             return await _context.Profiles
-                .Where(p => p.City.ToLower().Contains(city.ToLower()))
                 .Include(p => p.Interests)
-                .ToListAsync();
+            .ThenInclude(ui => ui.Interest)
+        .Where(p => p.City.ToLower().Contains(city.ToLower()))
+        .ToListAsync();
         }
 
         public async Task<IEnumerable<Profile>> GetByInterestIdAsync(int interestId)
         {
             return await _context.Profiles
-                .Where(p => p.Interests.Any(i => i.InterestId == interestId))
                 .Include(p => p.Interests)
+            .ThenInclude(i => i.Interest)
+        .Where(p => p.Interests.Any(i => i.InterestId == interestId))
+        .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Profile>> GetAllAsync()
+        {
+            return await _context.Profiles
+                .Include(p => p.Interests)
+                    .ThenInclude(i => i.Interest)
                 .ToListAsync();
         }
+
 
     }
 }

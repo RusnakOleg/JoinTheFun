@@ -15,6 +15,8 @@ namespace JoinTheFun.DAL.Repositories.Interfaces
 
         Task<IEnumerable<Profile>> GetByCityAsync(string city);
         Task<IEnumerable<Profile>> GetByInterestIdAsync(int interestId);
+        Task<IEnumerable<Profile>> GetAllAsync();
+
 
     }
 }
