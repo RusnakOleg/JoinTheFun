@@ -52,6 +52,8 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IInterestService, InterestService>();
 builder.Services.AddScoped<IUserInterestService, UserInterestService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 
 
 
