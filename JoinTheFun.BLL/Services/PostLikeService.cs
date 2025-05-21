@@ -25,8 +25,16 @@ namespace JoinTheFun.BLL.Services
         public Task<bool> IsLikedAsync(int postId, string userId) =>
             _repo.IsLikedAsync(postId, userId);
 
-        public async Task LikeAsync(PostLikeDto dto) =>
-            await _repo.AddAsync(_mapper.Map<PostLike>(dto));
+        public async Task LikeAsync(PostLikeDto dto)
+        {
+            var entity = _mapper.Map<PostLike>(dto);
+
+            entity.Post = null;
+            entity.User = null;
+
+            await _repo.AddAsync(entity);
+        }
+
 
         public async Task UnlikeAsync(PostLikeDto dto) =>
             await _repo.RemoveAsync(_mapper.Map<PostLike>(dto));
