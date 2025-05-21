@@ -18,6 +18,46 @@ builder.Services.AddHttpClient<IInterestService, InterestService>(client =>
     client.BaseAddress = new Uri("https://localhost:7038/api/");
 });
 
+builder.Services.AddHttpClient<ICommentService, CommentService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
+});
+
+builder.Services.AddHttpClient<IEventParticipantService, EventParticipantService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
+});
+
+builder.Services.AddHttpClient<IEventService, EventService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
+});
+
+builder.Services.AddHttpClient<IFollowService, FollowService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
+});
+
+builder.Services.AddHttpClient<ILikeService, LikeService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
+});
+
+builder.Services.AddHttpClient<IPostService, PostService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
+});
+
+builder.Services.AddHttpClient<IUserInterestService, UserInterestService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
+});
+
+builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
+});
+
 var app = builder.Build();
 
 
