@@ -41,5 +41,12 @@ namespace JoinTheFun.BLL.Services
         }
 
         public async Task DeleteAsync(int id) => await _repo.DeleteAsync(id);
+
+        public async Task<IEnumerable<PostDto>> GetPostsByFollowingsAsync(string userId)
+        {
+            var posts = await _repo.GetPostsByFollowingsAsync(userId);
+            return _mapper.Map<IEnumerable<PostDto>>(posts);
+        }
+
     }
 }

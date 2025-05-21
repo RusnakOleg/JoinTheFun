@@ -13,5 +13,8 @@ namespace JoinTheFun.BLL.Services.Interfaces
         Task<PostDto?> GetByIdAsync(int id);
         Task CreateAsync(CreatePostDto dto);
         Task DeleteAsync(int id);
+
+        Task<IEnumerable<PostDto>> GetPostsByFollowingsAsync(string userId);
+
     }
 }

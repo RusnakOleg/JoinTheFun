@@ -56,5 +56,13 @@ namespace JoinTheFun.API.Controllers
             await _postService.DeleteAsync(id);
             return Ok(new { message = "Пост видалено успішно" });
         }
+
+        [HttpGet("following/{userId}")]
+        public async Task<ActionResult<IEnumerable<PostDto>>> GetByFollowings(string userId)
+        {
+            var posts = await _postService.GetPostsByFollowingsAsync(userId);
+            return Ok(posts);
+        }
+
     }
 }

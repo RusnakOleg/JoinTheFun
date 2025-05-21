@@ -36,5 +36,22 @@ namespace JoinTheFun.DAL.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<IEnumerable<Post>> GetPostsByFollowingsAsync(string userId)
+        {
+            var followings = await _context.Follows
+                .Where(f => f.FollowerId == userId)
+                .Select(f => f.FollowedId)
+                .ToListAsync();
+
+            return await _context.Posts
+                .Where(p => followings.Contains(p.UserId))
+                .Include(p => p.User)
+                .Include(p => p.Comments)
+                .Include(p => p.Likes)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+        }
+
     }
 }

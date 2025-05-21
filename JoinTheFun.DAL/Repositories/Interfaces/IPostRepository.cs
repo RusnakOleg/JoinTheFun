@@ -13,5 +13,8 @@ namespace JoinTheFun.DAL.Repositories.Interfaces
         Task<Post?> GetByIdAsync(int id);
         Task AddAsync(Post post);
         Task DeleteAsync(int id);
+
+        Task<IEnumerable<Post>> GetPostsByFollowingsAsync(string userId);
+
     }
 }
