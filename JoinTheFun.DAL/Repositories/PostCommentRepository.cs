@@ -15,8 +15,13 @@ namespace JoinTheFun.DAL.Repositories
         private readonly ApplicationDbContext _context;
         public PostCommentRepository(ApplicationDbContext context) => _context = context;
 
-        public async Task<IEnumerable<PostComment>> GetByPostIdAsync(int postId) =>
-            await _context.PostComments.Where(c => c.PostId == postId).ToListAsync();
+        public async Task<IEnumerable<PostComment>> GetByPostIdAsync(int postId)
+        {
+            return await _context.PostComments
+                .Where(c => c.PostId == postId)
+                .Include(c => c.User) // додаємо автора
+                .ToListAsync();
+        }
 
         public async Task AddAsync(PostComment comment)
         {

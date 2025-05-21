@@ -31,8 +31,14 @@ namespace JoinTheFun.BLL.Services
         public async Task AddAsync(CreatePostCommentDto dto)
         {
             var entity = _mapper.Map<PostComment>(dto);
+
+            //  ЗАБЕЗПЕЧ, що EF не намагається вставити зв’язані сутності
+            entity.Post = null;
+            entity.User = null;
+
             await _repo.AddAsync(entity);
         }
+
 
         public async Task DeleteAsync(int commentId) => await _repo.DeleteAsync(commentId);
     }
