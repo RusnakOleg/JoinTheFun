@@ -16,6 +16,10 @@
 }
 else
 {
+    <div class="mb-3">
+        <strong>Ім’я користувача:</strong> @profile.Username
+    </div>
+
     <EditForm Model="editModel" OnValidSubmit="UpdateProfile">
         <DataAnnotationsValidator />
         <ValidationSummary />
@@ -58,7 +62,6 @@ else
                            @onchange="e => OnInterestChanged(e, interest.InterestId)" />
                     @interest.Name
                 </div>
-
             }
         </div>
 
@@ -86,7 +89,7 @@ else
                     Description = profile.Description,
                     AvatarUrl = profile.AvatarUrl,
                     Gender = profile.Gender,
-                    InterestIds = new List<int>() // буде заповнено нижче
+                    InterestIds = new List<int>()
                 };
 
             foreach (var interestName in profile.Interests)
@@ -103,7 +106,6 @@ else
         var isChecked = e.Value?.ToString() == "true" || e.Value?.ToString() == "on";
         ToggleInterest(interestId, isChecked);
     }
-
 
     private void ToggleInterest(int id, bool selected)
     {
@@ -122,6 +124,6 @@ else
     {
         var userId = UserContext.UserId;
         await ProfileService.UpdateAsync(editModel!, userId);
-        profile = await ProfileService.GetByUserIdAsync(userId); // оновити відображення
+        profile = await ProfileService.GetByUserIdAsync(userId);
     }
 }

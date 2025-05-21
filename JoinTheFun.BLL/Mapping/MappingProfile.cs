@@ -38,7 +38,8 @@ namespace JoinTheFun.BLL.Mapping
                 src.Interests != null
                 ? src.Interests.Select(i => i.Interest.Name).ToList()
                 : new List<string>()
-                ));
+                ))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.ApplicationUser.UserName));
 
             CreateMap<UpdateProfileDto, DAL.Entities.Profile>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null)); // тільки не-null

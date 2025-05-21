@@ -15,6 +15,7 @@ namespace BlazorFrontend.DTO.Profiles
         public string AvatarUrl { get; set; }
         public string Gender { get; set; }
         public List<string> Interests { get; set; }
+        public string Username { get; set; }
     }
 
 }

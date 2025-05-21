@@ -18,6 +18,7 @@ namespace JoinTheFun.DAL.Repositories
         public async Task<Profile?> GetByUserIdAsync(string userId)
         {
             return await _context.Profiles
+                .Include(p => p.ApplicationUser)
                 .Include(p => p.Interests)
                     .ThenInclude(ui => ui.Interest) // ⬅ ОБОВ’ЯЗКОВО
                 .FirstOrDefaultAsync(p => p.UserId == userId);
@@ -48,6 +49,7 @@ namespace JoinTheFun.DAL.Repositories
         public async Task<IEnumerable<Profile>> GetByInterestIdAsync(int interestId)
         {
             return await _context.Profiles
+                .Include(p => p.ApplicationUser)
                 .Include(p => p.Interests)
             .ThenInclude(i => i.Interest)
         .Where(p => p.Interests.Any(i => i.InterestId == interestId))
@@ -57,6 +59,7 @@ namespace JoinTheFun.DAL.Repositories
         public async Task<IEnumerable<Profile>> GetAllAsync()
         {
             return await _context.Profiles
+                .Include(p => p.ApplicationUser)
                 .Include(p => p.Interests)
                     .ThenInclude(i => i.Interest)
                 .ToListAsync();
