@@ -1,0 +1,39 @@
+﻿@page "/register"
+@using BlazorFrontend.DTO.Register
+@using BlazorFrontend.Services
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h3>Реєстрація</h3>
+
+<input @bind="Email" placeholder="Email" />
+<input @bind="Username" placeholder="Ім'я користувача" />
+<input @bind="Password" type="password" placeholder="Пароль" />
+<button @onclick="Registerr">Зареєструватись</button>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <p style="color:red">@Message</p>
+}
+
+@code {
+    string Email = "";
+    string Username = "";
+    string Password = "";
+    string Message = "";
+
+    async Task Registerr()
+    {
+        var success = await Auth.RegisterAsync(new RegisterDto
+            {
+                Email = Email,
+                Username = Username,
+                Password = Password
+            });
+
+        if (success)
+            Nav.NavigateTo("/login");
+        else
+            Message = "Помилка реєстрації!";
+    }
+}

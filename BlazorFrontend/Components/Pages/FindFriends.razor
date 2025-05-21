@@ -1,0 +1,87 @@
+﻿@page "/friends"
+@using BlazorFrontend.DTO.Profiles
+@using BlazorFrontend.DTO.Interests
+@using BlazorFrontend.Services.Interfaces
+
+@inject IProfileService ProfileService
+@inject IInterestService InterestService
+
+@rendermode InteractiveServer
+
+<h3>Пошук друзів</h3>
+
+<div class="mb-2">
+    <input @bind="searchCity" placeholder="Пошук за містом" />
+</div>
+
+<div class="mb-2">
+    <select @bind="selectedInterestId">
+        <option value="0">Усі інтереси</option>
+        @foreach (var interest in interests)
+        {
+            <option value="@interest.InterestId">@interest.Name</option>
+        }
+    </select>
+</div>
+
+<div>
+    <button @onclick="Search">Шукати</button>
+    <button class="ms-2" @onclick="Reset">Скинути</button>
+</div>
+
+@if (profiles == null)
+{
+    <p><em>Профілі не завантажено</em></p>
+}
+else if (profiles.Count == 0)
+{
+    <p><strong>Нічого не знайдено.</strong></p>
+}
+else
+{
+    @foreach (var profile in profiles)
+    {
+        <div class="card m-2 p-2 shadow">
+            <img src="@profile.AvatarUrl" width="64" height="64" />
+            <strong>@profile.City, @profile.Age</strong>
+            <p>@profile.Description</p>
+            <p>Інтереси: @string.Join(", ", profile.Interests)</p>
+        </div>
+    }
+}
+
+@code {
+    private string searchCity = "";
+    private int selectedInterestId = 0;
+    private List<ProfileDto>? profiles;
+    private List<InterestDto> interests = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        interests = await InterestService.GetAllAsync();
+        profiles = await ProfileService.GetAllAsync();
+    }
+
+    private async Task Search()
+    {
+        if (!string.IsNullOrWhiteSpace(searchCity))
+        {
+            profiles = await ProfileService.GetByCityAsync(searchCity);
+        }
+        else if (selectedInterestId != 0)
+        {
+            profiles = await ProfileService.GetByInterestIdAsync(selectedInterestId);
+        }
+        else
+        {
+            profiles = await ProfileService.GetAllAsync();
+        }
+    }
+
+    private async Task Reset()
+    {
+        searchCity = "";
+        selectedInterestId = 0;
+        profiles = await ProfileService.GetAllAsync();
+    }
+}

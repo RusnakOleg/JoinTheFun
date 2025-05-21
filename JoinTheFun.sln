@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JoinTheFun.BLL", "JoinTheFu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JoinTheFun.DAL", "JoinTheFun.DAL\JoinTheFun.DAL.csproj", "{014AFDC6-2A87-43F2-A9E0-7312AC3894D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorFrontend", "BlazorFrontend\BlazorFrontend.csproj", "{EB5D5D34-82AD-470B-8BDE-B02612136B98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorFrontend", "BlazorFrontend\BlazorFrontend.csproj", "{EB5D5D34-82AD-470B-8BDE-B02612136B98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,4 +1,6 @@
 using BlazorFrontend.Components;
+using BlazorFrontend.Services;
+using BlazorFrontend.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,12 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var app = builder.Build();
-
-builder.Services.AddScoped(sp => new HttpClient
+builder.Services.AddHttpClient<IProfileService, ProfileService>(client =>
 {
-    BaseAddress = new Uri("https://localhost:7038/api/")
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
 });
+
+builder.Services.AddHttpClient<IInterestService, InterestService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7038/api/");
+});
+
+var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
