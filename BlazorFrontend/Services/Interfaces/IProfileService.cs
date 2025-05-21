@@ -6,6 +6,8 @@ namespace BlazorFrontend.Services.Interfaces
     {
         Task<List<ProfileDto>> GetAllAsync();
 
+        Task<ProfileDto?> GetByUserIdAsync(string userId);
+
         Task<List<ProfileDto>> GetByCityAsync(string city);
         Task<List<ProfileDto>> GetByInterestIdAsync(int interestId);
     }
