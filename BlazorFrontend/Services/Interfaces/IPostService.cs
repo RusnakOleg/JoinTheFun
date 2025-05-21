@@ -8,5 +8,6 @@ namespace BlazorFrontend.Services.Interfaces
         Task<PostDto?> GetByIdAsync(int id);
         Task<bool> CreateAsync(CreatePostDto dto);
         Task<bool> DeleteAsync(int id);
+        Task<List<PostDto>> GetPostsByFollowingsAsync(string userId);
     }
 }

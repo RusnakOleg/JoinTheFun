@@ -34,5 +34,10 @@ namespace BlazorFrontend.Services
             var response = await _http.DeleteAsync($"posts/{id}");
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<List<PostDto>> GetPostsByFollowingsAsync(string userId)
+        {
+            return await _http.GetFromJsonAsync<List<PostDto>>($"posts/following/{userId}");
+        }
     }
 }
