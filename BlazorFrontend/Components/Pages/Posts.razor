@@ -1,0 +1,158 @@
+﻿@page "/posts"
+@using BlazorFrontend.DTO.Posts
+@using BlazorFrontend.DTO.Comments
+@using BlazorFrontend.DTO.Likes
+@using BlazorFrontend.Helpers
+@using BlazorFrontend.Services.Interfaces
+
+@inject IPostService PostService
+@inject ICommentService CommentService
+@inject ILikeService LikeService
+
+@rendermode InteractiveServer
+
+<h3>Пости</h3>
+
+@if (posts == null)
+{
+    <p>Завантаження...</p>
+}
+else if (posts.Count == 0)
+{
+    <p><em>Постів не знайдено.</em></p>
+}
+else
+{
+    @foreach (var post in posts)
+    {
+        <div class="card m-3 p-3 shadow">
+            <p><strong>@post.AuthorUsername</strong></p>
+            <p>@post.Content</p>
+
+            @if (!string.IsNullOrEmpty(post.ImageUrl))
+            {
+                <img src="@post.ImageUrl" class="img-fluid" />
+            }
+
+            <p>
+                👍 @post.LikeCount | 💬 @post.CommentCount
+                <button class="btn btn-sm btn-outline-primary ms-2" @onclick="() => ToggleLike(post.PostId)">Лайк</button>
+                <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => ToggleComments(post.PostId)">
+                    @(visibleComments.Contains(post.PostId) ? "Сховати коментарі" : "Показати коментарі")
+                </button>
+            </p>
+
+            @if (visibleComments.Contains(post.PostId))
+            {
+                <div class="mt-2">
+                    @if (comments.ContainsKey(post.PostId))
+                    {
+                        @foreach (var comment in comments[post.PostId])
+                        {
+                            <div class="border p-2 mb-1">
+                                <strong>@comment.AuthorUsername:</strong> @comment.Content
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p><em>Завантаження коментарів...</em></p>
+                    }
+                </div>
+            }
+
+            @{
+                var commentModel = newComments[post.PostId];
+            }
+
+            <EditForm Model="commentModel" OnValidSubmit="() => AddComment(post.PostId)">
+                <InputText @bind-Value="commentModel.Content" class="form-control mt-2" placeholder="Ваш коментар..." />
+                <button class="btn btn-sm btn-success mt-1">Надіслати</button>
+            </EditForm>
+
+        </div>
+    }
+}
+
+@code {
+    private List<PostDto>? posts;
+    private Dictionary<int, CreatePostCommentDto> newComments = new();
+    private Dictionary<int, List<PostCommentDto>> comments = new();
+    private HashSet<int> visibleComments = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = UserContext.UserId;
+
+        posts = await PostService.GetPostsByFollowingsAsync(userId);
+
+        foreach (var post in posts)
+        {
+            newComments[post.PostId] = new CreatePostCommentDto
+                {
+                    PostId = post.PostId,
+                    UserId = userId,
+                    Content = ""
+                };
+        }
+    }
+
+    private async Task AddComment(int postId)
+    {
+        if (!newComments.ContainsKey(postId)) return;
+
+        var dto = newComments[postId];
+        if (!string.IsNullOrWhiteSpace(dto.Content))
+        {
+            await CommentService.AddAsync(dto);
+            dto.Content = "";
+
+            await RefreshPostsAndComments(postId);
+        }
+    }
+
+    private async Task ToggleLike(int postId)
+    {
+        var userId = UserContext.UserId;
+        var dto = new PostLikeDto { PostId = postId, UserId = userId };
+
+        bool isLiked = await LikeService.IsLikedAsync(postId, userId);
+
+        if (isLiked)
+            await LikeService.UnlikeAsync(dto);
+        else
+            await LikeService.LikeAsync(dto);
+
+        await RefreshPosts();
+    }
+
+    private async Task ToggleComments(int postId)
+    {
+        if (visibleComments.Contains(postId))
+        {
+            visibleComments.Remove(postId);
+        }
+        else
+        {
+            visibleComments.Add(postId);
+
+            if (!comments.ContainsKey(postId))
+            {
+                var loadedComments = await CommentService.GetByPostIdAsync(postId);
+                comments[postId] = loadedComments.ToList();
+            }
+        }
+    }
+
+    private async Task RefreshPosts()
+    {
+        var userId = UserContext.UserId;
+        posts = await PostService.GetPostsByFollowingsAsync(userId);
+    }
+
+    private async Task RefreshPostsAndComments(int postId)
+    {
+        await RefreshPosts();
+        comments[postId] = await CommentService.GetByPostIdAsync(postId);
+    }
+}

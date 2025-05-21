@@ -1,31 +1,127 @@
 ﻿@page "/profile"
+@using BlazorFrontend.DTO.Interests
 @using BlazorFrontend.DTO.Profiles
 @using BlazorFrontend.Helpers
 @using BlazorFrontend.Services.Interfaces
 @inject IProfileService ProfileService
+@inject IInterestService InterestService
+
+@rendermode InteractiveServer
 
 <h3>Мій профіль</h3>
 
-@if (profile == null)
+@if (profile == null || editModel == null)
 {
     <p>Завантаження...</p>
 }
 else
 {
-    <div class="card p-3 shadow">
-        <img src="@profile.AvatarUrl" width="100" />
-        <h5>@profile.City, @profile.Age</h5>
-        <p>@profile.Description</p>
-        <p><strong>Інтереси:</strong> @string.Join(", ", profile.Interests)</p>
-    </div>
+    <EditForm Model="editModel" OnValidSubmit="UpdateProfile">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-2">
+            <label>Місто:</label>
+            <InputText @bind-Value="editModel.City" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>Вік:</label>
+            <InputNumber @bind-Value="editModel.Age" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>Опис:</label>
+            <InputTextArea @bind-Value="editModel.Description" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>Аватар (URL):</label>
+            <InputText @bind-Value="editModel.AvatarUrl" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>Стать:</label>
+            <InputSelect @bind-Value="editModel.Gender" class="form-control">
+                <option value="Male">Чоловіча</option>
+                <option value="Female">Жіноча</option>
+            </InputSelect>
+        </div>
+
+        <div class="mb-2">
+            <label>Інтереси:</label>
+            @foreach (var interest in allInterests)
+            {
+                <div>
+                    <input type="checkbox"
+                           checked="@editModel.InterestIds.Contains(interest.InterestId)"
+                           @onchange="e => OnInterestChanged(e, interest.InterestId)" />
+                    @interest.Name
+                </div>
+
+            }
+        </div>
+
+        <button class="btn btn-primary mt-2">Зберегти зміни</button>
+    </EditForm>
 }
 
 @code {
     private ProfileDto? profile;
+    private UpdateProfileDto? editModel;
+    private List<InterestDto> allInterests = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var userId = UserContext.UserId; 
+        var userId = UserContext.UserId;
         profile = await ProfileService.GetByUserIdAsync(userId);
+        allInterests = await InterestService.GetAllAsync();
+
+        if (profile != null)
+        {
+            editModel = new UpdateProfileDto
+                {
+                    City = profile.City,
+                    Age = profile.Age,
+                    Description = profile.Description,
+                    AvatarUrl = profile.AvatarUrl,
+                    Gender = profile.Gender,
+                    InterestIds = new List<int>() // буде заповнено нижче
+                };
+
+            foreach (var interestName in profile.Interests)
+            {
+                var interest = allInterests.FirstOrDefault(i => i.Name == interestName);
+                if (interest != null)
+                    editModel.InterestIds.Add(interest.InterestId);
+            }
+        }
+    }
+
+    private void OnInterestChanged(ChangeEventArgs e, int interestId)
+    {
+        var isChecked = e.Value?.ToString() == "true" || e.Value?.ToString() == "on";
+        ToggleInterest(interestId, isChecked);
+    }
+
+
+    private void ToggleInterest(int id, bool selected)
+    {
+        if (selected)
+        {
+            if (!editModel!.InterestIds.Contains(id))
+                editModel.InterestIds.Add(id);
+        }
+        else
+        {
+            editModel!.InterestIds.Remove(id);
+        }
+    }
+
+    private async Task UpdateProfile()
+    {
+        var userId = UserContext.UserId;
+        await ProfileService.UpdateAsync(editModel!, userId);
+        profile = await ProfileService.GetByUserIdAsync(userId); // оновити відображення
     }
 }

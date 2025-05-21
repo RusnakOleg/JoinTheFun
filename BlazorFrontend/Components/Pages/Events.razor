@@ -1,0 +1,69 @@
+﻿@page "/events"
+@using BlazorFrontend.DTO.Events
+@using BlazorFrontend.Services.Interfaces
+
+@inject IEventService EventService
+
+@rendermode InteractiveServer
+
+<h3>Список подій</h3>
+
+<div class="mb-2">
+    <input @bind="searchCity" placeholder="Пошук за містом" class="form-control" />
+</div>
+
+<div>
+    <button @onclick="Search" class="btn btn-primary">Шукати</button>
+    <button class="btn btn-secondary ms-2" @onclick="Reset">Скинути</button>
+</div>
+
+@if (events == null)
+{
+    <p><em>Події не завантажено...</em></p>
+}
+else if (events.Count == 0)
+{
+    <p><strong>Нічого не знайдено.</strong></p>
+}
+else
+{
+    @foreach (var ev in events)
+    {
+        <div class="card m-2 p-3 shadow">
+            <img src="@ev.ImageUrl" width="100" />
+            <h5>@ev.Title</h5>
+            <p>@ev.Description</p>
+            <p><strong>Місце:</strong> @ev.Location</p>
+            <p><strong>Час:</strong> @ev.StartTime.ToString("g")</p>
+            <p><strong>Учасників:</strong> @ev.ParticipantCount</p>
+        </div>
+    }
+}
+
+@code {
+    private string searchCity = "";
+    private List<EventDto>? events;
+
+    protected override async Task OnInitializedAsync()
+    {
+        events = await EventService.GetAllAsync();
+    }
+
+    private async Task Search()
+    {
+        if (!string.IsNullOrWhiteSpace(searchCity))
+        {
+            events = await EventService.GetByLocationAsync(searchCity);
+        }
+        else
+        {
+            events = await EventService.GetAllAsync();
+        }
+    }
+
+    private async Task Reset()
+    {
+        searchCity = "";
+        events = await EventService.GetAllAsync();
+    }
+}
