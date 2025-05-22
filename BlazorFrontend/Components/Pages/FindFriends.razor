@@ -43,7 +43,7 @@ else
     {
         <a href="@($"/user-profile/{profile.UserId}")" class="text-decoration-none">
             <div class="card m-2 p-2 shadow">
-                <img src="@profile.AvatarUrl" width="64" height="64" />
+                <img src="@GetParsedImage(profile.AvatarUrl)" width="64" height="64" />
                 <strong>@profile.Username</strong>
                 <strong>@profile.City, @profile.Age</strong>
                 <p>@profile.Description</p>
@@ -87,5 +87,13 @@ else
         searchCity = "";
         selectedInterestId = 0;
         profiles = await ProfileService.GetAllAsync();
+    }
+
+    private string GetParsedImage(string? base64)
+    {
+        if (string.IsNullOrEmpty(base64))
+            return ""; // або якась заглушка
+
+        return $"data:image/jpeg;base64,{base64}";
     }
 }

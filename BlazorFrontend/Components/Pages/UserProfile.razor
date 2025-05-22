@@ -23,7 +23,7 @@
 else
 {
     <div class="card p-3 shadow mb-4">
-        <img src="@profile.AvatarUrl" width="100" />
+        <img src="@GetParsedImage(profile.AvatarUrl)" width="100" />
         <h4>@profile.Username</h4>
         <p><strong>@profile.City, @profile.Age</strong></p>
         <p>@profile.Description</p>
@@ -204,5 +204,13 @@ else
     {
         posts = (await PostService.GetAllAsync())
             .Where(p => p.AuthorUsername == profile?.Username).ToList();
+    }
+
+    private string GetParsedImage(string? base64)
+    {
+        if (string.IsNullOrEmpty(base64))
+            return ""; // або якась заглушка
+
+        return $"data:image/jpeg;base64,{base64}";
     }
 }

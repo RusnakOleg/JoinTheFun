@@ -31,7 +31,7 @@ else
 
             @if (!string.IsNullOrEmpty(post.ImageUrl))
             {
-                <img src="@post.ImageUrl" class="img-fluid" />
+                <img src="@GetParsedImage(post.ImageUrl)" class="img-fluid" />
             }
 
             <p>
@@ -154,5 +154,13 @@ else
     {
         await RefreshPosts();
         comments[postId] = await CommentService.GetByPostIdAsync(postId);
+    }
+
+    private string GetParsedImage(string? base64)
+    {
+        if (string.IsNullOrEmpty(base64))
+            return ""; // або якась заглушка
+
+        return $"data:image/jpeg;base64,{base64}";
     }
 }

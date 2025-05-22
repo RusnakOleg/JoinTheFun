@@ -27,7 +27,7 @@
 else
 {
     <div class="card p-3 shadow mb-4">
-        <img src="@profile.AvatarUrl" width="100" />
+        <img src="@GetParsedImage(profile.AvatarUrl)" width="150" />
         <h4>@profile.Username</h4>
         <p><strong>@profile.City, @profile.Age</strong></p>
         <p>@profile.Description</p>
@@ -41,7 +41,16 @@ else
         <div class="mb-2"><label>Місто:</label> <InputText @bind-Value="editModel.City" class="form-control" /></div>
         <div class="mb-2"><label>Вік:</label> <InputNumber @bind-Value="editModel.Age" class="form-control" /></div>
         <div class="mb-2"><label>Опис:</label> <InputTextArea @bind-Value="editModel.Description" class="form-control" /></div>
-        <div class="mb-2"><label>Аватар (URL):</label> <InputText @bind-Value="editModel.AvatarUrl" class="form-control" /></div>
+        <div class="mb-2">
+            <label>Аватар:</label>
+            <InputFile OnChange="HandleImageUpload" />
+            @if (!string.IsNullOrEmpty(editModel.AvatarUrl))
+            {
+                <div class="mt-2">
+                    <img src="@GetParsedImage(editModel.AvatarUrl)" width="150" />
+                </div>
+            }
+        </div>
         <div class="mb-2">
             <label>Стать:</label>
             <InputSelect @bind-Value="editModel.Gender" class="form-control">
@@ -100,7 +109,7 @@ else
                 <p>@post.Content</p>
                 @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
                 {
-                    <img src="@post.ImageUrl" class="img-fluid" />
+                    <img src="@GetParsedImage(post.ImageUrl)" class="img-fluid" />
                 }
 
                 <p>
@@ -366,6 +375,27 @@ else
             editModel.InterestIds.Remove(interestId);
     }
 
+    private string GetParsedImage(string? base64)
+    {
+        if (string.IsNullOrEmpty(base64))
+            return ""; // або якась заглушка
 
+        return $"data:image/jpeg;base64,{base64}";
+    }
 
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null)
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // до 5MB
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            string base64 = Convert.ToBase64String(bytes);
+
+            editModel!.AvatarUrl = base64;
+        }
+    }
 }
