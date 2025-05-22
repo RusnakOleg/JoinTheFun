@@ -19,184 +19,259 @@
 
 @rendermode InteractiveServer
 
-<h3>Мій профіль</h3>
+<div class="container mt-4">
+    <h3 class="fw-bold text-center mb-4">Мій профіль</h3>
 
-@if (profile == null || editModel == null)
-{
-    <p>Завантаження...</p>
-}
-else
-{
-    <div class="card p-3 shadow mb-4">
-        <img src="@GetParsedImage(profile.AvatarUrl)" width="150" />
-        <h4>@profile.Username</h4>
-        <p><strong>@profile.City, @profile.Age</strong></p>
-        <p>@profile.Description</p>
-        <p><strong>Інтереси:</strong> @string.Join(", ", profile.Interests)</p>
-    </div>
-
-    <EditForm Model="editModel" OnValidSubmit="UpdateProfile">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-
-        <div class="mb-2"><label>Місто:</label> <InputText @bind-Value="editModel.City" class="form-control" /></div>
-        <div class="mb-2"><label>Вік:</label> <InputNumber @bind-Value="editModel.Age" class="form-control" /></div>
-        <div class="mb-2"><label>Опис:</label> <InputTextArea @bind-Value="editModel.Description" class="form-control" /></div>
-        <div class="mb-2">
-            <label>Аватар:</label>
-            <InputFile OnChange="HandleImageUpload" />
-            @if (!string.IsNullOrEmpty(editModel.AvatarUrl))
-            {
-                <div class="mt-2">
-                    <img src="@GetParsedImage(editModel.AvatarUrl)" width="150" />
-                </div>
-            }
-        </div>
-        <div class="mb-2">
-            <label>Стать:</label>
-            <InputSelect @bind-Value="editModel.Gender" class="form-control">
-                <option value="Male">Чоловіча</option>
-                <option value="Female">Жіноча</option>
-            </InputSelect>
-        </div>
-        <div class="mb-2">
-            <label>Інтереси:</label>
-            @foreach (var interest in allInterests)
-            {
-                <div>
-                    <input type="checkbox"
-                           checked="@IsInterestSelected(interest.InterestId)"
-                           @onchange="e => ToggleInterest(interest.InterestId, (bool)e.Value!)" />
-                    @interest.Name
-                </div>
-            }
-
-
-        </div>
-        <button class="btn btn-primary mt-2">Зберегти зміни</button>
-    </EditForm>
-
-    <hr />
-
-    <h5>Мої події</h5>
-    <button class="btn btn-outline-success mb-3" @onclick="NavigateToCreateEvent">
-        ➕ Створити подію
-    </button>
-    @if (userEvents.Count == 0)
+    @if (profile == null || editModel == null)
     {
-        <p>Подій не знайдено.</p>
+        <div class="text-center text-muted"><em>Завантаження...</em></div>
     }
     else
     {
-        @foreach (var ev in userEvents)
-        {
-            <div class="card mb-2 p-2">
-                <strong>@ev.Title</strong> – @ev.Location (@ev.StartTime.ToShortDateString())
-                <strong>Кількість учасників: @ev.ParticipantCount</strong>
-                <button class="btn btn-sm btn-danger float-end" @onclick="() => DeleteEvent(ev.EventId)">Видалити</button>
-            </div>
-        }
-    }
-
-
-    <h5 class="mt-4">Мої пости</h5>
-    <button class="btn btn-success mb-3" @onclick="ShowCreatePostModal">Створити пост</button>
-    @if (posts.Count == 0)
-    {
-        <p>Постів немає.</p>
-    }
-    else
-    {
-        @foreach (var post in posts)
-        {
-            <div class="card p-3 mb-3 shadow">
-                <p><strong>@post.AuthorUsername</strong></p>
-                <p>@post.Content</p>
-                @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
-                {
-                    <img src="@GetParsedImage(post.ImageUrl)" class="img-fluid" width="350" />
-                }
-
-                <p>
-                    👍 @post.LikeCount | 💬 @post.CommentCount
-                    <button class="btn btn-sm btn-outline-primary ms-2" @onclick="() => ToggleLike(post.PostId)">Лайк</button>
-                    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => ToggleComments(post.PostId)">
-                        @(visibleComments.Contains(post.PostId) ? "Сховати коментарі" : "Показати коментарі")
-                    </button>
-                    <button class="btn btn-sm btn-danger ms-2" @onclick="() => DeletePost(post.PostId)">Видалити пост</button>
-                </p>
-
-                @if (visibleComments.Contains(post.PostId))
-                {
-                    <div class="mt-2">
-                        @if (comments.ContainsKey(post.PostId))
-                        {
-                            @foreach (var comment in comments[post.PostId])
-                            {
-                                <div class="border p-2 mb-1">
-                                    <strong>@comment.AuthorUsername:</strong> @comment.Content
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <p><em>Завантаження коментарів...</em></p>
-                        }
+        <div class="row gx-4 gy-4">
+            <!-- LEFT column: Профіль + редагування -->
+            <div class="col-12 col-lg-4">
+                <div style="max-height: 130vh; overflow-y: auto; padding-right: 4px;">
+                    <!-- Профільна інформація -->
+                    <div class="card p-4 shadow-sm mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="@GetParsedImage(profile.AvatarUrl)" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;" />
+                            <div>
+                                <h5 class="mb-1">@profile.Username</h5>
+                                <p class="mb-0 text-muted">@profile.City, @profile.Age</p>
+                            </div>
+                        </div>
+                        <p>@profile.Description</p>
+                        <p><strong>Інтереси:</strong> @string.Join(", ", profile.Interests)</p>
                     </div>
-                }
-                @{
-                    var commentModel = newComments[post.PostId];
-                }
 
-                <EditForm Model="commentModel" OnValidSubmit="() => SubmitComment(post.PostId)">
-                    <InputText @bind-Value="commentModel.Content" class="form-control" />
-                    <button class="btn btn-sm btn-success mt-1">Надіслати</button>
-                </EditForm>
-                
-            </div>
-        }
-    }
-}
+                    <!-- Форма редагування -->
+                    <div class="card p-4 shadow-sm">
+                        <h6 class="fw-semibold mb-3">Редагування</h6>
 
-@if (showPostModal)
-{
-    <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
-        <div class="modal-dialog">
-            <div class="modal-content p-3">
-                <div class="modal-header">
-                    <h5 class="modal-title">Новий пост</h5>
-                    <button type="button" class="btn-close" @onclick="ClosePostModal"></button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="newPost" OnValidSubmit="CreatePost">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
+                        <EditForm Model="editModel" OnValidSubmit="UpdateProfile">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger mb-3" />
 
-                        <div class="mb-2">
-                            <label>Зміст:</label>
-                            <InputTextArea @bind-Value="newPost.Content" class="form-control" />
-                        </div>
+                            <div class="form-floating mb-3">
+                                <InputText @bind-Value="editModel.City" id="city" class="form-control" placeholder="Місто" />
+                                <label for="city">Місто</label>
+                            </div>
 
-                        <div class="mb-2">
-                            <label>Зображення:</label>
-                            <InputFile OnChange="HandlePostImageUpload" />
-                            @if (!string.IsNullOrEmpty(newPost.ImageUrl))
-                            {
-                                <div class="mt-2">
-                                    <img src="@GetParsedImage(newPost.ImageUrl)" class="img-fluid" />
+                            <div class="form-floating mb-3">
+                                <InputNumber @bind-Value="editModel.Age" id="age" class="form-control" placeholder="Вік" />
+                                <label for="age">Вік</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <InputTextArea @bind-Value="editModel.Description" id="desc" class="form-control" placeholder="Опис" style="height: 100px;" />
+                                <label for="desc">Опис</label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Аватар:</label>
+                                <InputFile OnChange="HandleImageUpload" />
+                                @if (!string.IsNullOrEmpty(editModel.AvatarUrl))
+                                {
+                                    <div class="mt-2">
+                                        <img src="@GetParsedImage(editModel.AvatarUrl)" class="img-thumbnail" style="max-width: 150px;" />
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Стать:</label>
+                                <InputSelect @bind-Value="editModel.Gender" class="form-select">
+                                    <option value="Male">Чоловіча</option>
+                                    <option value="Female">Жіноча</option>
+                                </InputSelect>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Інтереси:</label>
+                                <div class="row">
+                                    @foreach (var interest in allInterests)
+                                    {
+                                        <div class="col-6 mb-1">
+                                            <input type="checkbox"
+                                                   checked="@IsInterestSelected(interest.InterestId)"
+                                                   @onchange="e => ToggleInterest(interest.InterestId, (bool)e.Value!)" />
+                                            @interest.Name
+                                        </div>
+                                    }
                                 </div>
-                            }
-                        </div>
+                            </div>
+
+                            <button class="btn btn-primary w-100">Зберегти</button>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT column: Події та пости -->
+            <div class="col-12 col-lg-8">
+                <!-- Події -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-semibold mb-0">Мої події</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary me-2" @onclick="() => showMyEvents = !showMyEvents">
+                            @(showMyEvents ? "⬆ Сховати" : "⬇ Показати")
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" @onclick="NavigateToCreateEvent">➕ Створити подію</button>
+                    </div>
+                </div>
+
+                @if (showMyEvents)
+                {
+                    @if (userEvents.Count == 0)
+                    {
+                        <p class="text-muted">Подій не знайдено.</p>
+                    }
+                    else
+                    {
+                        @foreach (var ev in userEvents)
+                        {
+                            <div class="card p-3 mb-3 shadow-sm">
+                                <strong>@ev.Title</strong> – @ev.Location (@ev.StartTime.ToShortDateString())<br />
+                                <small>Кількість учасників: @ev.ParticipantCount</small>
+                                <button class="btn btn-sm btn-danger float-end" @onclick="() => DeleteEvent(ev.EventId)">Видалити</button>
+                            </div>
+                        }
+                    }
+                }
 
 
-                        <button class="btn btn-primary" type="submit">Опублікувати</button>
-                        <button class="btn btn-secondary ms-2" @onclick="ClosePostModal" type="button">Скасувати</button>
-                    </EditForm>
+               
+
+                <!-- Пости -->
+                <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+                    <h5 class="fw-semibold mb-0">Мої пости</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary me-2" @onclick="() => showMyPosts = !showMyPosts">
+                            @(showMyPosts ? "⬆ Сховати" : "⬇ Показати")
+                        </button>
+                        <button class="btn btn-success btn-sm" @onclick="ShowCreatePostModal">Створити пост</button>
+                    </div>
+                </div>
+                @if (showMyPosts)
+                {
+                @if (posts.Count == 0)
+                {
+                    <p class="text-muted">Постів немає.</p>
+                }
+                else
+                {
+                    @foreach (var post in posts)
+                    {
+                            <div class="card p-3 mb-4 shadow-sm position-relative">
+                                <!-- Кнопка видалення -->
+                                <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
+                                        title="Видалити пост"
+                                        @onclick="() => DeletePost(post.PostId)">
+                                    ×
+                                </button>
+
+                                <p class="fw-semibold mb-1">@post.AuthorUsername</p>
+                                <p>@post.Content</p>
+
+                                @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
+                                {
+                                    <div class="text-center mb-3">
+                                        <img src="@GetParsedImage(post.ImageUrl)" class="img-fluid rounded" style="max-width: 500px;" />
+                                    </div>
+                                }
+
+                                <!-- Лайки, коментарі, дії -->
+                                <div class="d-flex align-items-center flex-wrap mb-2">
+                                    <span class="me-3">👍 @post.LikeCount</span>
+                                    <span class="me-3">💬 @post.CommentCount</span>
+
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => ToggleLike(post.PostId)">Лайк</button>
+                                    <button class="btn btn-sm btn-outline-secondary me-2" @onclick="() => ToggleComments(post.PostId)">
+                                        @(visibleComments.Contains(post.PostId) ? "Сховати коментарі" : "Показати коментарі")
+                                    </button>
+                                </div>
+
+                                @if (visibleComments.Contains(post.PostId))
+                                {
+                                    <div class="list-group mb-3">
+                                        @if (comments.ContainsKey(post.PostId))
+                                        {
+                                            @foreach (var comment in comments[post.PostId])
+                                            {
+                                                <div class="list-group-item">
+                                                    <strong>@comment.AuthorUsername:</strong> @comment.Content
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="text-muted"><em>Завантаження коментарів...</em></div>
+                                        }
+                                    </div>
+                                }
+
+                                @{
+                                    var commentModel = newComments[post.PostId];
+                                }
+
+                                <EditForm Model="commentModel" OnValidSubmit="() => SubmitComment(post.PostId)">
+                                    <div class="input-group">
+                                        <InputText @bind-Value="commentModel.Content" class="form-control" placeholder="Ваш коментар..." />
+                                        <button class="btn btn-success" type="submit">Надіслати</button>
+                                    </div>
+                                </EditForm>
+                            </div>
+
+                    }
+                }
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Модальне вікно нового поста -->
+    @if (showPostModal)
+    {
+        <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+            <div class="modal-dialog">
+                <div class="modal-content p-3">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Новий пост</h5>
+                        <button type="button" class="btn-close" @onclick="ClosePostModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <EditForm Model="newPost" OnValidSubmit="CreatePost">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger mb-3" />
+
+                            <div class="form-floating mb-3">
+                                <InputTextArea @bind-Value="newPost.Content" id="postContent" class="form-control" placeholder="Зміст" style="height: 100px;" />
+                                <label for="postContent">Зміст</label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Зображення:</label>
+                                <InputFile OnChange="HandlePostImageUpload" />
+                                @if (!string.IsNullOrEmpty(newPost.ImageUrl))
+                                {
+                                    <div class="mt-2">
+                                        <img src="@GetParsedImage(newPost.ImageUrl)" class="img-fluid" />
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-primary" type="submit">Опублікувати</button>
+                                <button class="btn btn-secondary ms-2" type="button" @onclick="ClosePostModal">Скасувати</button>
+                            </div>
+                        </EditForm>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-}
+    }
+</div>
 
 
 @code {
@@ -209,6 +284,9 @@ else
     private Dictionary<int, List<PostCommentDto>> comments = new();
     private HashSet<int> visibleComments = new();
     private string currentUserId = UserContext.UserId;
+    private bool showMyEvents = true;
+    private bool showMyPosts = true;
+
 
     private bool showPostModal = false;
     private CreatePostDto newPost = new();
@@ -294,19 +372,6 @@ else
         }
     }
 
-    /*private void OnInterestChanged(ChangeEventArgs e, int interestId)
-    {
-        var isChecked = e.Value?.ToString() == "true" || e.Value?.ToString() == "on";
-        ToggleInterest(interestId, isChecked);
-    }
-
-    private void ToggleInterest(int id, bool selected)
-    {
-        if (selected && !editModel!.InterestIds.Contains(id))
-            editModel.InterestIds.Add(id);
-        else if (!selected)
-            editModel!.InterestIds.Remove(id);
-    }*/
 
     private async Task UpdateProfile()
     {

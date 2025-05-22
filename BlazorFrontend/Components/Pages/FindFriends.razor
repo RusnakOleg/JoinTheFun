@@ -8,51 +8,69 @@
 
 @rendermode InteractiveServer
 
-<h3>Пошук друзів</h3>
+<h3 class="fw-bold text-center mb-4">Пошук друзів</h3>
 
-<div class="mb-2">
-    <input @bind="searchCity" placeholder="Пошук за містом" />
-</div>
+<div class="d-flex justify-content-center mb-4">
+    <div style="width: 100%; max-width: 700px;">
+        <div class="card p-4 shadow-sm mb-4">
+            <div class="row g-3 align-items-end">
+                <!-- Місто -->
+                <div class="col-md-6">
+                    <label class="form-label">Місто</label>
+                    <input @bind="searchCity" class="form-control" placeholder="Пошук за містом" />
+                </div>
 
-<div class="mb-2">
-    <select @bind="selectedInterestId">
-        <option value="0">Усі інтереси</option>
-        @foreach (var interest in interests)
-        {
-            <option value="@interest.InterestId">@interest.Name</option>
-        }
-    </select>
-</div>
+                <!-- Інтерес -->
+                <div class="col-md-6">
+                    <label class="form-label">Інтерес</label>
+                    <select @bind="selectedInterestId" class="form-select">
+                        <option value="0">Усі інтереси</option>
+                        @foreach (var interest in interests)
+                        {
+                            <option value="@interest.InterestId">@interest.Name</option>
+                        }
+                    </select>
+                </div>
 
-<div>
-    <button @onclick="Search">Шукати</button>
-    <button class="ms-2" @onclick="Reset">Скинути</button>
-</div>
-
-@if (profiles == null)
-{
-    <p><em>Профілі не завантажено</em></p>
-}
-else if (profiles.Count == 0)
-{
-    <p><strong>Нічого не знайдено.</strong></p>
-}
-else
-{
-    @foreach (var profile in profiles)
-    {
-        <a href="@($"/user-profile/{profile.UserId}")" class="text-decoration-none">
-            <div class="card m-2 p-2 shadow">
-                <img src="@GetParsedImage(profile.AvatarUrl)" width="64" height="64" />
-                <strong>@profile.Username</strong>
-                <strong>@profile.City, @profile.Age</strong>
-                <p>@profile.Description</p>
-                <p>Інтереси: @string.Join(", ", profile.Interests)</p>
+                <!-- Кнопки -->
+                <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-primary me-2" @onclick="Search">Шукати</button>
+                    <button class="btn btn-secondary" @onclick="Reset">Скинути</button>
+                </div>
             </div>
-        </a>
+        </div>
 
-    }
-}
+        <!-- Результати -->
+        @if (profiles == null)
+        {
+            <div class="text-center text-muted"><em>Профілі не завантажено</em></div>
+        }
+        else if (profiles.Count == 0)
+        {
+            <div class="text-center"><strong>Нічого не знайдено.</strong></div>
+        }
+        else
+        {
+            @foreach (var profile in profiles)
+            {
+                <a href="@($"/user-profile/{profile.UserId}")" class="text-decoration-none text-dark">
+                    <div class="card p-3 mb-3 shadow-sm">
+                        <div class="d-flex align-items-center">
+                            <img src="@GetParsedImage(profile.AvatarUrl)" class="rounded-circle me-3" style="width: 64px; height: 64px; object-fit: cover;" />
+                            <div>
+                                <h5 class="mb-1">@profile.Username</h5>
+                                <p class="mb-1 text-muted">@profile.City, @profile.Age</p>
+                                <p class="mb-1">@profile.Description</p>
+                                <p class="mb-0"><strong>Інтереси:</strong> @string.Join(", ", profile.Interests)</p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        }
+    </div>
+</div>
+
 
 @code {
     private string searchCity = "";

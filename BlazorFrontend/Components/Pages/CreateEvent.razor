@@ -7,40 +7,49 @@
 
 @rendermode InteractiveServer
 
-<h3>Створити нову подію</h3>
+<div class="d-flex justify-content-center align-items-start mt-5">
+    <div class="card shadow-sm p-4" style="width: 100%; max-width: 600px;">
+        <h3 class="mb-4 fw-bold text-center">Створити нову подію</h3>
 
-<EditForm Model="newEvent" OnValidSubmit="AddEvent">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+        <EditForm Model="newEvent" OnValidSubmit="AddEvent">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger mb-3" />
 
-    <div class="mb-2">
-        <label>Назва події:</label>
-        <InputText @bind-Value="newEvent.Title" class="form-control" />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="newEvent.Title" id="title" class="form-control" placeholder="Назва події" />
+                <label for="title">Назва події</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputTextArea @bind-Value="newEvent.Description" id="description" class="form-control" placeholder="Опис" style="height: 100px;" />
+                <label for="description">Опис</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="newEvent.Location" id="location" class="form-control" placeholder="Місто" />
+                <label for="location">Місто</label>
+            </div>
+
+            <div class="form-floating mb-4">
+                <InputDate @bind-Value="newEvent.StartTime" id="startTime" class="form-control" />
+                <label for="startTime">Час початку</label>
+            </div>
+
+            @* Якщо захочеш повернути зображення:
+            <div class="form-floating mb-3">
+            <InputText @bind-Value="newEvent.ImageUrl" id="imageUrl" class="form-control" placeholder="URL зображення" />
+            <label for="imageUrl">Зображення (URL)</label>
+            </div>
+            *@
+
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-success me-2" type="submit">Створити</button>
+                <button class="btn btn-secondary" type="button" @onclick="Cancel">Скасувати</button>
+            </div>
+        </EditForm>
     </div>
+</div>
 
-    <div class="mb-2">
-        <label>Опис:</label>
-        <InputTextArea @bind-Value="newEvent.Description" class="form-control" />
-    </div>
-
-    <div class="mb-2">
-        <label>Місто:</label>
-        <InputText @bind-Value="newEvent.Location" class="form-control" />
-    </div>
-
-    <div class="mb-2">
-        <label>Час початку:</label>
-        <InputDate @bind-Value="newEvent.StartTime" class="form-control" />
-    </div>
-
-    <!--<div class="mb-2">
-        <label>Зображення (URL):</label>
-        <InputText @bind-Value="newEvent.ImageUrl" class="form-control" />
-    </div>-->
-
-    <button class="btn btn-success">Створити</button>
-    <button class="btn btn-secondary ms-2" @onclick="Cancel">Скасувати</button>
-</EditForm>
 
 @code {
     private CreateEventDto newEvent = new()

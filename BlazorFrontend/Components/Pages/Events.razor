@@ -11,53 +11,64 @@
 
 @rendermode InteractiveServer
 
-<h3>Список подій</h3>
+<h3 class="mb-4 fw-bold text-center">Список подій</h3>
 
-<button class="btn btn-outline-success mb-3 float-end" @onclick="NavigateToCreateEvent">
-    ➕ Створити подію
-</button>
+<div class="d-flex justify-content-center">
+    <div style="width: 100%; max-width: 800px;">
 
-<div class="mb-2">
-    <input @bind="searchCity" placeholder="Пошук за містом" class="form-control" />
-</div>
+        <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+            <div class="d-flex" style="max-width: 500px; width: 100%;">
+                <input @bind="searchCity" placeholder="Пошук за містом" class="form-control me-2" />
+                <button class="btn btn-primary me-2" type="button" @onclick="Search">Шукати</button>
+                <button class="btn btn-secondary" type="button" @onclick="Reset">Скинути</button>
+            </div>
 
-<div>
-    <button @onclick="Search" class="btn btn-primary">Шукати</button>
-    <button class="btn btn-secondary ms-2" @onclick="Reset">Скинути</button>
-</div>
-
-@if (events == null)
-{
-    <p><em>Події не завантажено...</em></p>
-}
-else if (events.Count == 0)
-{
-    <p><strong>Нічого не знайдено.</strong></p>
-}
-else
-{
-    @foreach (var ev in events)
-    {
-        <div class="card m-2 p-3 shadow">
-            <!--<img src="@ev.ImageUrl" width="100" />-->
-            <h5>@ev.Title</h5>
-            <p>@ev.Description</p>
-            <p><strong>Місце:</strong> @ev.Location</p>
-            <p><strong>Час:</strong> @ev.StartTime.ToString("g")</p>
-            <p><strong>Учасників:</strong> @ev.ParticipantCount</p>
-            <p><strong>Автор події:</strong> @ev.CreatorUsername</p>
-
-            @if (joinedEventIds.Contains(ev.EventId))
-            {
-                <button class="btn btn-danger" @onclick="() => LeaveEvent(ev.EventId)">Вийти з події</button>
-            }
-            else
-            {
-                <button class="btn btn-success" @onclick="() => JoinEvent(ev.EventId)">Долучитися</button>
-            }
+            <button class="btn btn-outline-success" @onclick="NavigateToCreateEvent">
+                ➕ Створити подію
+            </button>
         </div>
-    }
-}
+
+
+
+        @if (events == null)
+        {
+            <div class="text-muted text-center"><em>Події не завантажено...</em></div>
+        }
+        else if (events.Count == 0)
+        {
+            <div class="text-center"><strong>Нічого не знайдено.</strong></div>
+        }
+        else
+        {
+            @foreach (var ev in events)
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-semibold">@ev.Title</h5>
+                        <p class="card-text">@ev.Description</p>
+
+                        <ul class="list-unstyled mb-3">
+                            <li><strong>Місце:</strong> @ev.Location</li>
+                            <li><strong>Час:</strong> @ev.StartTime.ToString("g")</li>
+                            <li><strong>Учасників:</strong> @ev.ParticipantCount</li>
+                            <li><strong>Автор:</strong> @ev.CreatorUsername</li>
+                        </ul>
+
+                        @if (joinedEventIds.Contains(ev.EventId))
+                        {
+                            <button class="btn btn-danger" @onclick="() => LeaveEvent(ev.EventId)">Вийти з події</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-success" @onclick="() => JoinEvent(ev.EventId)">Долучитися</button>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
 
 @code {
     private string searchCity = "";

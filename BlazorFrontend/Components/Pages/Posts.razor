@@ -11,68 +11,82 @@
 
 @rendermode InteractiveServer
 
-<h3>Пости</h3>
+<h3 class="mb-4 fw-bold text-center">Пости</h3>
 
-@if (posts == null)
-{
-    <p>Завантаження...</p>
-}
-else if (posts.Count == 0)
-{
-    <p><em>Постів не знайдено.</em></p>
-}
-else
-{
-    @foreach (var post in posts)
-    {
-        <div class="card m-3 p-3 shadow">
-            <p><strong>@post.AuthorUsername</strong></p>
-            <p>@post.Content</p>
-
-            @if (!string.IsNullOrEmpty(post.ImageUrl))
+<div class="d-flex justify-content-center">
+    <div style="width: 100%; max-width: 700px;">
+        @if (posts == null)
+        {
+            <div class="text-center text-muted">Завантаження...</div>
+        }
+        else if (posts.Count == 0)
+        {
+            <div class="text-center text-muted"><em>Постів не знайдено.</em></div>
+        }
+        else
+        {
+            @foreach (var post in posts)
             {
-                <img src="@GetParsedImage(post.ImageUrl)" class="img-fluid" width="350" />
-            }
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">@post.AuthorUsername</h6>
+                        <p class="card-text">@post.Content</p>
 
-            <p>
-                👍 @post.LikeCount | 💬 @post.CommentCount
-                <button class="btn btn-sm btn-outline-primary ms-2" @onclick="() => ToggleLike(post.PostId)">Лайк</button>
-                <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => ToggleComments(post.PostId)">
-                    @(visibleComments.Contains(post.PostId) ? "Сховати коментарі" : "Показати коментарі")
-                </button>
-            </p>
-
-            @if (visibleComments.Contains(post.PostId))
-            {
-                <div class="mt-2">
-                    @if (comments.ContainsKey(post.PostId))
-                    {
-                        @foreach (var comment in comments[post.PostId])
+                        @if (!string.IsNullOrEmpty(post.ImageUrl))
                         {
-                            <div class="border p-2 mb-1">
-                                <strong>@comment.AuthorUsername:</strong> @comment.Content
+                            <div class="text-center mb-3">
+                                <img src="@GetParsedImage(post.ImageUrl)" class="img-fluid rounded" style="max-width: 500px;" />
                             </div>
                         }
-                    }
-                    else
-                    {
-                        <p><em>Завантаження коментарів...</em></p>
-                    }
+
+                        <div class="d-flex align-items-center mb-2 flex-wrap">
+                            <span class="me-3">👍 @post.LikeCount</span>
+                            <span class="me-3">💬 @post.CommentCount</span>
+
+                            <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => ToggleLike(post.PostId)">Лайк</button>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleComments(post.PostId)">
+                                @(visibleComments.Contains(post.PostId) ? "Сховати коментарі" : "Показати коментарі")
+                            </button>
+                        </div>
+
+                        @if (visibleComments.Contains(post.PostId))
+                        {
+                            <div class="mt-3">
+                                @if (comments.ContainsKey(post.PostId))
+                                {
+                                    <div class="list-group mb-3">
+                                        @foreach (var comment in comments[post.PostId])
+                                        {
+                                            <div class="list-group-item">
+                                                <strong>@comment.AuthorUsername:</strong> @comment.Content
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted"><em>Завантаження коментарів...</em></div>
+                                }
+
+                                @{
+                                    var commentModel = newComments[post.PostId];
+                                }
+
+                                <EditForm Model="commentModel" OnValidSubmit="() => AddComment(post.PostId)">
+                                    <div class="input-group">
+                                        <InputText @bind-Value="commentModel.Content" class="form-control" placeholder="Ваш коментар..." />
+                                        <button class="btn btn-success" type="submit">Надіслати</button>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        }
+                    </div>
                 </div>
             }
+        }
+    </div>
+</div>
 
-            @{
-                var commentModel = newComments[post.PostId];
-            }
-
-            <EditForm Model="commentModel" OnValidSubmit="() => AddComment(post.PostId)">
-                <InputText @bind-Value="commentModel.Content" class="form-control mt-2" placeholder="Ваш коментар..." />
-                <button class="btn btn-sm btn-success mt-1">Надіслати</button>
-            </EditForm>
-
-        </div>
-    }
-}
 
 @code {
     private List<PostDto>? posts;
