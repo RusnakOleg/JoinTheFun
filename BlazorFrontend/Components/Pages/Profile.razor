@@ -55,11 +55,13 @@ else
             {
                 <div>
                     <input type="checkbox"
-                           checked="@editModel.InterestIds.Contains(interest.InterestId)"
-                           @onchange="e => OnInterestChanged(e, interest.InterestId)" />
+                           checked="@IsInterestSelected(interest.InterestId)"
+                           @onchange="e => ToggleInterest(interest.InterestId, (bool)e.Value!)" />
                     @interest.Name
                 </div>
             }
+
+
         </div>
         <button class="btn btn-primary mt-2">Зберегти зміни</button>
     </EditForm>
@@ -271,7 +273,7 @@ else
         }
     }
 
-    private void OnInterestChanged(ChangeEventArgs e, int interestId)
+    /*private void OnInterestChanged(ChangeEventArgs e, int interestId)
     {
         var isChecked = e.Value?.ToString() == "true" || e.Value?.ToString() == "on";
         ToggleInterest(interestId, isChecked);
@@ -283,7 +285,7 @@ else
             editModel.InterestIds.Add(id);
         else if (!selected)
             editModel!.InterestIds.Remove(id);
-    }
+    }*/
 
     private async Task UpdateProfile()
     {
@@ -347,6 +349,23 @@ else
         await PostService.DeleteAsync(postId);
         await RefreshPosts(); 
     }
+
+    private bool IsInterestSelected(int interestId)
+    {
+        return editModel?.InterestIds.Contains(interestId) ?? false;
+    }
+
+    private void ToggleInterest(int interestId, bool selected)
+    {
+        if (editModel == null)
+            return;
+
+        if (selected && !editModel.InterestIds.Contains(interestId))
+            editModel.InterestIds.Add(interestId);
+        else if (!selected && editModel.InterestIds.Contains(interestId))
+            editModel.InterestIds.Remove(interestId);
+    }
+
 
 
 }
