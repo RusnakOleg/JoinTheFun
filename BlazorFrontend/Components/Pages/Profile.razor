@@ -15,6 +15,7 @@
 @inject ICommentService CommentService
 @inject ILikeService LikeService
 @inject IEventService EventService
+@inject NavigationManager Navigation
 
 @rendermode InteractiveServer
 
@@ -78,6 +79,9 @@ else
     <hr />
 
     <h5>Мої події</h5>
+    <button class="btn btn-outline-success mb-3" @onclick="NavigateToCreateEvent">
+        ➕ Створити подію
+    </button>
     @if (userEvents.Count == 0)
     {
         <p>Подій не знайдено.</p>
@@ -88,6 +92,7 @@ else
         {
             <div class="card mb-2 p-2">
                 <strong>@ev.Title</strong> – @ev.Location (@ev.StartTime.ToShortDateString())
+                <strong>Кількість учасників: @ev.ParticipantCount</strong>
                 <button class="btn btn-sm btn-danger float-end" @onclick="() => DeleteEvent(ev.EventId)">Видалити</button>
             </div>
         }
@@ -422,5 +427,9 @@ else
         }
     }
 
+    private void NavigateToCreateEvent()
+    {
+        Navigation.NavigateTo("/create-event");
+    }
 
 }

@@ -1,5 +1,6 @@
 ﻿@page "/user-profile/{UserId}"
 @using BlazorFrontend.DTO.Comments
+@using BlazorFrontend.DTO.Event_Participants
 @using BlazorFrontend.DTO.Events
 @using BlazorFrontend.DTO.Folowers
 @using BlazorFrontend.DTO.Likes
@@ -13,6 +14,8 @@
 @inject ILikeService LikeService
 @inject IEventService EventService
 @inject IFollowService FollowService
+@inject IEventParticipantService ParticipantService
+
 
 @rendermode InteractiveServer
 
@@ -49,6 +52,16 @@ else
         {
             <div class="card mb-2 p-2">
                 <strong>@ev.Title</strong> – @ev.Location (@ev.StartTime.ToShortDateString())
+                <p>Кількість учасників: @ev.ParticipantCount</p>
+
+                @if (joinedEventIds.Contains(ev.EventId))
+                {
+                    <button class="btn btn-sm btn-danger float-end" @onclick="() => LeaveEvent(ev.EventId)">Вийти</button>
+                }
+                else
+                {
+                    <button class="btn btn-sm btn-success float-end" @onclick="() => JoinEvent(ev.EventId)">Долучитися</button>
+                }
             </div>
         }
     }
@@ -120,6 +133,7 @@ else
     private HashSet<int> visibleComments = new();
     private string currentUserId = UserContext.UserId;
     private bool isFollowing;
+    private HashSet<int> joinedEventIds = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -143,6 +157,9 @@ else
         }
 
         isFollowing = await FollowService.IsFollowingAsync(currentUserId, UserId);
+        var joined = await ParticipantService.GetByUserIdAsync(currentUserId);
+        joinedEventIds = joined.Select(p => p.EventId).ToHashSet();
+
     }
 
     private async Task ToggleFollow()
@@ -213,4 +230,40 @@ else
 
         return $"data:image/jpeg;base64,{base64}";
     }
+
+    private async Task JoinEvent(int eventId)
+    {
+        var dto = new EventParticipantDto
+            {
+                EventId = eventId,
+                UserId = currentUserId,
+                Status = "going"
+            };
+
+        await ParticipantService.AddAsync(dto);
+        await ReloadEventData();
+    }
+
+    private async Task LeaveEvent(int eventId)
+    {
+        var dto = new RemoveEventParticipantDto
+            {
+                EventId = eventId,
+                UserId = currentUserId
+            };
+
+        await ParticipantService.RemoveAsync(dto);
+        await ReloadEventData();
+    }
+
+
+    private async Task ReloadEventData()
+    {
+        userEvents = (await EventService.GetAllAsync())
+            .Where(e => e.CreatorUsername == profile?.Username).ToList();
+
+        var joined = await ParticipantService.GetByUserIdAsync(currentUserId);
+        joinedEventIds = joined.Select(p => p.EventId).ToHashSet();
+    }
+
 }
