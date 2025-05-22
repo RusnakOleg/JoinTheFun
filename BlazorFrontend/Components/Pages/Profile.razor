@@ -82,7 +82,9 @@ else
         }
     }
 
+
     <h5 class="mt-4">Мої пости</h5>
+    <button class="btn btn-success mb-3" @onclick="ShowCreatePostModal">Створити пост</button>
     @if (posts.Count == 0)
     {
         <p>Постів немає.</p>
@@ -140,6 +142,40 @@ else
     }
 }
 
+@if (showPostModal)
+{
+    <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content p-3">
+                <div class="modal-header">
+                    <h5 class="modal-title">Новий пост</h5>
+                    <button type="button" class="btn-close" @onclick="ClosePostModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="newPost" OnValidSubmit="CreatePost">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-2">
+                            <label>Зміст:</label>
+                            <InputTextArea @bind-Value="newPost.Content" class="form-control" />
+                        </div>
+
+                        <div class="mb-2">
+                            <label>URL зображення:</label>
+                            <InputText @bind-Value="newPost.ImageUrl" class="form-control" />
+                        </div>
+
+                        <button class="btn btn-primary" type="submit">Опублікувати</button>
+                        <button class="btn btn-secondary ms-2" @onclick="ClosePostModal" type="button">Скасувати</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 @code {
     private ProfileDto? profile;
     private UpdateProfileDto? editModel;
@@ -150,6 +186,48 @@ else
     private Dictionary<int, List<PostCommentDto>> comments = new();
     private HashSet<int> visibleComments = new();
     private string currentUserId = UserContext.UserId;
+
+    private bool showPostModal = false;
+    private CreatePostDto newPost = new();
+
+    private void ShowCreatePostModal()
+    {
+        newPost = new CreatePostDto
+            {
+                UserId = currentUserId,
+                Content = "",
+                ImageUrl = ""
+            };
+        showPostModal = true;
+    }
+
+    private void ClosePostModal()
+    {
+        showPostModal = false;
+    }
+
+    private async Task CreatePost()
+    {
+        await PostService.CreateAsync(newPost);
+        showPostModal = false;
+
+        await RefreshPosts();
+
+        foreach (var post in posts)
+        {
+            if (!newComments.ContainsKey(post.PostId))
+            {
+                newComments[post.PostId] = new CreatePostCommentDto
+                    {
+                        PostId = post.PostId,
+                        UserId = currentUserId,
+                        Content = ""
+                    };
+            }
+        }
+    }
+
+
 
     protected override async Task OnInitializedAsync()
     {
