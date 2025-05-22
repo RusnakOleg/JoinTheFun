@@ -33,10 +33,10 @@
         <InputDate @bind-Value="newEvent.StartTime" class="form-control" />
     </div>
 
-    <div class="mb-2">
+    <!--<div class="mb-2">
         <label>Зображення (URL):</label>
         <InputText @bind-Value="newEvent.ImageUrl" class="form-control" />
-    </div>
+    </div>-->
 
     <button class="btn btn-success">Створити</button>
     <button class="btn btn-secondary ms-2" @onclick="Cancel">Скасувати</button>
@@ -46,7 +46,8 @@
     private CreateEventDto newEvent = new()
         {
             StartTime = DateTime.Now,
-            CreatorId = UserContext.UserId
+            CreatorId = UserContext.UserId,
+            ImageUrl = "skip"
         };
 
     private async Task AddEvent()
