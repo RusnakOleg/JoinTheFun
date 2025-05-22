@@ -12,5 +12,7 @@ namespace JoinTheFun.DAL.Repositories.Interfaces
         Task<IEnumerable<EventParticipant>> GetByEventIdAsync(int eventId);
         Task AddAsync(EventParticipant participant);
         Task RemoveAsync(EventParticipant participant);
+        Task<IEnumerable<EventParticipant>> GetByUserIdAsync(string userId);
+
     }
 }

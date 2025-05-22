@@ -35,5 +35,9 @@ namespace BlazorFrontend.Services
 
             return response.IsSuccessStatusCode;
         }
+        public async Task<List<EventParticipantDto>> GetByUserIdAsync(string userId)
+        {
+            return await _http.GetFromJsonAsync<List<EventParticipantDto>>($"eventParticipants/by-user/{userId}");
+        }
     }
 }

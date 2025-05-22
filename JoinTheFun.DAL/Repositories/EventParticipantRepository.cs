@@ -29,5 +29,14 @@ namespace JoinTheFun.DAL.Repositories
             _context.EventParticipants.Remove(participant);
             await _context.SaveChangesAsync();
         }
+        public async Task<IEnumerable<EventParticipant>> GetByUserIdAsync(string userId)
+        {
+            return await _context.EventParticipants
+                .Include(p => p.Event) 
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
+        }
+
+
     }
 }

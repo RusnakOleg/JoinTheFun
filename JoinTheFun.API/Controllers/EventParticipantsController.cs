@@ -27,6 +27,16 @@ namespace JoinTheFun.API.Controllers
         }
 
         /// <summary>
+        /// Отримати всі події, в яких бере участь користувач
+        /// </summary>
+        [HttpGet("by-user/{userId}")]
+        public async Task<ActionResult<IEnumerable<EventParticipantDto>>> GetByUserId(string userId)
+        {
+            var result = await _participantService.GetByUserIdAsync(userId);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Долучити користувача до події (going / interested)
         /// </summary>
         [HttpPost]

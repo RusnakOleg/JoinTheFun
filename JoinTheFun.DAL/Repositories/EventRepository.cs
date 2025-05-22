@@ -16,7 +16,7 @@ namespace JoinTheFun.DAL.Repositories
         public EventRepository(ApplicationDbContext context) => _context = context;
 
         public async Task<IEnumerable<Event>> GetAllAsync() =>
-            await _context.Events.Include(e => e.Creator).ToListAsync();
+            await _context.Events.Include(e => e.Creator).Include(e => e.Participants).ToListAsync();
 
         public async Task<Event?> GetByIdAsync(int id) =>
             await _context.Events.Include(e => e.Participants).FirstOrDefaultAsync(e => e.EventId == id);

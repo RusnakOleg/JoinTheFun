@@ -1,8 +1,11 @@
 ﻿@page "/events"
 @using BlazorFrontend.DTO.Events
+@using BlazorFrontend.DTO.Event_Participants
+@using BlazorFrontend.Helpers
 @using BlazorFrontend.Services.Interfaces
 
 @inject IEventService EventService
+@inject IEventParticipantService ParticipantService
 
 @rendermode InteractiveServer
 
@@ -36,6 +39,15 @@ else
             <p><strong>Місце:</strong> @ev.Location</p>
             <p><strong>Час:</strong> @ev.StartTime.ToString("g")</p>
             <p><strong>Учасників:</strong> @ev.ParticipantCount</p>
+
+            @if (joinedEventIds.Contains(ev.EventId))
+            {
+                <button class="btn btn-danger" @onclick="() => LeaveEvent(ev.EventId)">Вийти з події</button>
+            }
+            else
+            {
+                <button class="btn btn-success" @onclick="() => JoinEvent(ev.EventId)">Долучитися</button>
+            }
         </div>
     }
 }
@@ -43,10 +55,19 @@ else
 @code {
     private string searchCity = "";
     private List<EventDto>? events;
+    private HashSet<int> joinedEventIds = new();
+    private string userId = UserContext.UserId;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
         events = await EventService.GetAllAsync();
+        var joined = await ParticipantService.GetByUserIdAsync(userId);
+        joinedEventIds = joined.Select(p => p.EventId).ToHashSet();
     }
 
     private async Task Search()
@@ -59,11 +80,39 @@ else
         {
             events = await EventService.GetAllAsync();
         }
+
+        var joined = await ParticipantService.GetByUserIdAsync(userId);
+        joinedEventIds = joined.Select(p => p.EventId).ToHashSet();
     }
 
     private async Task Reset()
     {
         searchCity = "";
-        events = await EventService.GetAllAsync();
+        await LoadData();
+    }
+
+    private async Task JoinEvent(int eventId)
+    {
+        var dto = new EventParticipantDto
+        {
+            EventId = eventId,
+            UserId = userId,
+            Status = "going" // або "interested", якщо потрібно
+        };
+
+        await ParticipantService.AddAsync(dto);
+        await LoadData();
+    }
+
+    private async Task LeaveEvent(int eventId)
+    {
+        var dto = new RemoveEventParticipantDto
+        {
+            EventId = eventId,
+            UserId = userId
+        };
+
+        await ParticipantService.RemoveAsync(dto);
+        await LoadData();
     }
 }
