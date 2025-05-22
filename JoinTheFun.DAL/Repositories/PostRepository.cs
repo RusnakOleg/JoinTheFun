@@ -15,8 +15,15 @@ namespace JoinTheFun.DAL.Repositories
         private readonly ApplicationDbContext _context;
         public PostRepository(ApplicationDbContext context) => _context = context;
 
-        public async Task<IEnumerable<Post>> GetAllAsync() =>
-            await _context.Posts.Include(p => p.User).ToListAsync();
+        public async Task<IEnumerable<Post>> GetAllAsync()
+        {
+            return await _context.Posts
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
+                .Include(p => p.User) 
+                .ToListAsync();
+        }
+
 
         public async Task<Post?> GetByIdAsync(int id) =>
             await _context.Posts.Include(p => p.User).FirstOrDefaultAsync(p => p.PostId == id);
