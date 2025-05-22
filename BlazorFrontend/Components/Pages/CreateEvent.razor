@@ -1,0 +1,62 @@
+﻿@page "/create-event"
+@using BlazorFrontend.DTO.Events
+@using BlazorFrontend.Helpers
+@using BlazorFrontend.Services.Interfaces
+@inject IEventService EventService
+@inject NavigationManager Navigation
+
+@rendermode InteractiveServer
+
+<h3>Створити нову подію</h3>
+
+<EditForm Model="newEvent" OnValidSubmit="AddEvent">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-2">
+        <label>Назва події:</label>
+        <InputText @bind-Value="newEvent.Title" class="form-control" />
+    </div>
+
+    <div class="mb-2">
+        <label>Опис:</label>
+        <InputTextArea @bind-Value="newEvent.Description" class="form-control" />
+    </div>
+
+    <div class="mb-2">
+        <label>Місто:</label>
+        <InputText @bind-Value="newEvent.Location" class="form-control" />
+    </div>
+
+    <div class="mb-2">
+        <label>Час початку:</label>
+        <InputDate @bind-Value="newEvent.StartTime" class="form-control" />
+    </div>
+
+    <div class="mb-2">
+        <label>Зображення (URL):</label>
+        <InputText @bind-Value="newEvent.ImageUrl" class="form-control" />
+    </div>
+
+    <button class="btn btn-success">Створити</button>
+    <button class="btn btn-secondary ms-2" @onclick="Cancel">Скасувати</button>
+</EditForm>
+
+@code {
+    private CreateEventDto newEvent = new()
+        {
+            StartTime = DateTime.Now,
+            CreatorId = UserContext.UserId
+        };
+
+    private async Task AddEvent()
+    {
+        await EventService.CreateAsync(newEvent);
+        Navigation.NavigateTo("/events");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/events");
+    }
+}

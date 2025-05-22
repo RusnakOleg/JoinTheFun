@@ -6,10 +6,16 @@
 
 @inject IEventService EventService
 @inject IEventParticipantService ParticipantService
+@inject NavigationManager Navigation
+
 
 @rendermode InteractiveServer
 
 <h3>Список подій</h3>
+
+<button class="btn btn-outline-success mb-3 float-end" @onclick="NavigateToCreateEvent">
+    ➕ Створити подію
+</button>
 
 <div class="mb-2">
     <input @bind="searchCity" placeholder="Пошук за містом" class="form-control" />
@@ -116,4 +122,10 @@ else
         await ParticipantService.RemoveAsync(dto);
         await LoadData();
     }
+
+    private void NavigateToCreateEvent()
+    {
+        Navigation.NavigateTo("/create-event");
+    }
+
 }
