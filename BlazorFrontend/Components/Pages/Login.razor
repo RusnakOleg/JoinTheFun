@@ -14,29 +14,36 @@
 
 @rendermode InteractiveServer
 
-<h3>Вхід</h3>
+<div class="d-flex justify-content-center align-items-start mt-5">
+    <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px;">
+        <h3 class="mb-4 fw-bold text-center">Вхід</h3>
 
-<EditForm Model="loginModel" OnValidSubmit="LoginUser">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+        <EditForm Model="loginModel" OnValidSubmit="LoginUser">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger mb-3" />
 
-    <div>
-        <label>Ім'я користувача:</label>
-        <InputText @bind-Value="loginModel.Username" class="form-control" />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="loginModel.Username" id="username" class="form-control" placeholder="Ім'я користувача" />
+                <label for="username">Ім'я користувача</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="loginModel.Password" type="password" id="password" class="form-control" placeholder="Пароль" />
+                <label for="password">Пароль</label>
+            </div>
+
+            <button class="btn btn-primary w-100 py-2">Увійти</button>
+
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <div class="alert alert-danger mt-3 mb-0" role="alert">
+                    @message
+                </div>
+            }
+        </EditForm>
     </div>
+</div>
 
-    <div>
-        <label>Пароль:</label>
-        <InputText @bind-Value="loginModel.Password" type="password" class="form-control" />
-    </div>
-
-    <button class="btn btn-success mt-2">Увійти</button>
-
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <p class="text-danger mt-2">@message</p>
-    }
-</EditForm>
 
 @code {
     private LoginDto loginModel = new();
