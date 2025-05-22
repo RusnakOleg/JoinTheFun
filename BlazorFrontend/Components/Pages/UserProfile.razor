@@ -1,0 +1,208 @@
+﻿@page "/user-profile/{UserId}"
+@using BlazorFrontend.DTO.Comments
+@using BlazorFrontend.DTO.Events
+@using BlazorFrontend.DTO.Folowers
+@using BlazorFrontend.DTO.Likes
+@using BlazorFrontend.DTO.Posts
+@using BlazorFrontend.DTO.Profiles
+@using BlazorFrontend.Helpers
+@using BlazorFrontend.Services.Interfaces
+@inject IProfileService ProfileService
+@inject IPostService PostService
+@inject ICommentService CommentService
+@inject ILikeService LikeService
+@inject IEventService EventService
+@inject IFollowService FollowService
+
+@rendermode InteractiveServer
+
+@if (profile == null)
+{
+    <p><em>Завантаження...</em></p>
+}
+else
+{
+    <div class="card p-3 shadow mb-4">
+        <img src="@profile.AvatarUrl" width="100" />
+        <h4>@profile.Username</h4>
+        <p><strong>@profile.City, @profile.Age</strong></p>
+        <p>@profile.Description</p>
+        <p><strong>Інтереси:</strong> @string.Join(", ", profile.Interests)</p>
+
+        @if (UserId != currentUserId)
+        {
+            <button class="btn btn-sm @(isFollowing ? "btn-danger" : "btn-primary")"
+                    @onclick="ToggleFollow">
+                @(isFollowing ? "Відписатись" : "Підписатись")
+            </button>
+        }
+    </div>
+
+    <h5>Події користувача</h5>
+    @if (userEvents.Count == 0)
+    {
+        <p>Подій не знайдено.</p>
+    }
+    else
+    {
+        @foreach (var ev in userEvents)
+        {
+            <div class="card mb-2 p-2">
+                <strong>@ev.Title</strong> – @ev.Location (@ev.StartTime.ToShortDateString())
+            </div>
+        }
+    }
+
+    <h5 class="mt-4">Пости користувача</h5>
+    @if (posts.Count == 0)
+    {
+        <p>Постів немає.</p>
+    }
+    else
+    {
+        @foreach (var post in posts)
+        {
+            <div class="card p-3 mb-3 shadow">
+                <p><strong>@post.AuthorUsername</strong></p>
+                <p>@post.Content</p>
+                @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
+                {
+                    <img src="@post.ImageUrl" class="img-fluid" />
+                }
+
+                <p>
+                    👍 @post.LikeCount | 💬 @post.CommentCount
+                    <button class="btn btn-sm btn-outline-primary ms-2" @onclick="() => ToggleLike(post.PostId)">Лайк</button>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => ToggleComments(post.PostId)">
+                        @(visibleComments.Contains(post.PostId) ? "Сховати коментарі" : "Показати коментарі")
+                    </button>
+                </p>
+
+                @if (visibleComments.Contains(post.PostId))
+                {
+                    <div class="mt-2">
+                        @if (comments.ContainsKey(post.PostId))
+                        {
+                            @foreach (var comment in comments[post.PostId])
+                            {
+                                <div class="border p-2 mb-1">
+                                    <strong>@comment.AuthorUsername:</strong> @comment.Content
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p><em>Завантаження коментарів...</em></p>
+                        }
+                    </div>
+                }
+
+                @{
+                    var commentModel = newComments[post.PostId];
+                }
+                <EditForm Model="commentModel" OnValidSubmit="() => SubmitComment(post.PostId)">
+                    <InputText @bind-Value="commentModel.Content" class="form-control mt-2" placeholder="Ваш коментар..." />
+                    <button class="btn btn-sm btn-success mt-1">Надіслати</button>
+                </EditForm>
+
+            </div>
+        }
+    }
+}
+
+@code {
+    [Parameter] public string UserId { get; set; } = "";
+    private ProfileDto? profile;
+    private List<PostDto>? posts;
+    private List<EventDto> userEvents = new();
+    private Dictionary<int, CreatePostCommentDto> newComments = new();
+    private Dictionary<int, List<PostCommentDto>> comments = new();
+    private HashSet<int> visibleComments = new();
+    private string currentUserId = UserContext.UserId;
+    private bool isFollowing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        profile = await ProfileService.GetByUserIdAsync(UserId);
+        if (profile == null) return;
+
+        posts = (await PostService.GetAllAsync())
+            .Where(p => p.AuthorUsername == profile.Username).ToList();
+
+        userEvents = (await EventService.GetAllAsync())
+            .Where(e => e.CreatorUsername == profile.Username).ToList();
+
+        foreach (var post in posts)
+        {
+            newComments[post.PostId] = new CreatePostCommentDto
+                {
+                    PostId = post.PostId,
+                    UserId = currentUserId,
+                    Content = ""
+                };
+        }
+
+        isFollowing = await FollowService.IsFollowingAsync(currentUserId, UserId);
+    }
+
+    private async Task ToggleFollow()
+    {
+        var dto = new FollowDto { FollowerId = currentUserId, FollowedId = UserId };
+
+        if (isFollowing)
+            await FollowService.UnfollowAsync(dto);
+        else
+            await FollowService.FollowAsync(dto);
+
+        isFollowing = !isFollowing;
+    }
+
+    private async Task ToggleLike(int postId)
+    {
+        var dto = new PostLikeDto { PostId = postId, UserId = currentUserId };
+        bool liked = await LikeService.IsLikedAsync(postId, currentUserId);
+
+        if (liked)
+            await LikeService.UnlikeAsync(dto);
+        else
+            await LikeService.LikeAsync(dto);
+
+        await RefreshPosts();
+    }
+
+    private async Task ToggleComments(int postId)
+    {
+        if (visibleComments.Contains(postId))
+        {
+            visibleComments.Remove(postId);
+        }
+        else
+        {
+            visibleComments.Add(postId);
+
+            if (!comments.ContainsKey(postId))
+            {
+                comments[postId] = await CommentService.GetByPostIdAsync(postId);
+            }
+        }
+    }
+
+    private async Task SubmitComment(int postId)
+    {
+        var dto = newComments[postId];
+        if (string.IsNullOrWhiteSpace(dto.Content)) return;
+
+        await CommentService.AddAsync(dto);
+        dto.Content = "";
+
+        // оновлення коментарів та постів
+        comments[postId] = await CommentService.GetByPostIdAsync(postId);
+        await RefreshPosts();
+    }
+
+    private async Task RefreshPosts()
+    {
+        posts = (await PostService.GetAllAsync())
+            .Where(p => p.AuthorUsername == profile?.Username).ToList();
+    }
+}
