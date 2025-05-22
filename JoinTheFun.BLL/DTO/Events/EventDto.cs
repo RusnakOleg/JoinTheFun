@@ -16,6 +16,7 @@ namespace JoinTheFun.BLL.DTO.Events
         public string ImageUrl { get; set; }
         public string CreatorUsername { get; set; }
         public int ParticipantCount { get; set; }
+        public string CreatorId { get; set; }
     }
 
 }

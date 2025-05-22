@@ -18,6 +18,7 @@ namespace JoinTheFun.BLL.Mapping
         {
             // Event
             CreateMap<Event, EventDto>()
+                .ForMember(dest => dest.CreatorId, opt => opt.MapFrom(src => src.CreatorId))
                 .ForMember(dest => dest.CreatorUsername, opt => opt.MapFrom(src => src.Creator.UserName))
                 .ForMember(dest => dest.ParticipantCount, opt => opt.MapFrom(src => src.Participants.Count));
 
