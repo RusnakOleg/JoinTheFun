@@ -1,50 +1,39 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">BlazorFrontend</a>
-    </div>
+﻿<div class="d-flex flex-column flex-shrink-0 p-3 bg-white border-end shadow-sm" style="width: 250px; height: 100vh;">
+    <a href="/" class="d-flex align-items-center mb-4 text-dark text-decoration-none">
+        <span class="fs-5 fw-bold">BlazorFrontend</span>
+    </a>
+    <hr />
+
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <NavLink href="/register" class="nav-link text-dark rounded-pill px-3 py-2 d-flex align-items-center fs-6 fw-semibold" activeClass="active bg-primary text-white">
+                <span class="me-2 d-inline-block" style="width: 20px;"><i class="bi bi-person-plus"></i></span> Register
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink href="/login" class="nav-link text-dark rounded-pill px-3 py-2 d-flex align-items-center fs-6 fw-semibold" activeClass="active bg-primary text-white">
+                <span class="me-2 d-inline-block" style="width: 20px;"><i class="bi bi-box-arrow-in-right"></i></span> Login
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink href="/posts" class="nav-link text-dark rounded-pill px-3 py-2 d-flex align-items-center fs-6 fw-semibold" activeClass="active bg-primary text-white">
+                <span class="me-2 d-inline-block" style="width: 20px;"><i class="bi bi-images"></i></span> Home
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink href="/friends" class="nav-link text-dark rounded-pill px-3 py-2 d-flex align-items-center fs-6 fw-semibold" activeClass="active bg-primary text-white">
+                <span class="me-2 d-inline-block" style="width: 20px;"><i class="bi bi-people"></i></span> Search Friends
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink href="/events" class="nav-link text-dark rounded-pill px-3 py-2 d-flex align-items-center fs-6 fw-semibold" activeClass="active bg-primary text-white">
+                <span class="me-2 d-inline-block" style="width: 20px;"><i class="bi bi-calendar-event"></i></span> Events
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink href="/profile" class="nav-link text-dark rounded-pill px-3 py-2 d-flex align-items-center fs-6 fw-semibold" activeClass="active bg-primary text-white">
+                <span class="me-2 d-inline-block" style="width: 20px;"><i class="bi bi-person-circle"></i></span> My Profile
+            </NavLink>
+        </li>
+    </ul>
 </div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-       
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/register">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Register
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/login">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Login
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/posts">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Posts
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/friends">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Friends
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/events">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Events
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/profile">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Profile
-            </NavLink>
-        </div>
-        <!--<NavLink href="/friends">Friends</NavLink>
-        <NavLink href="/register">Register</NavLink>
-        <NavLink href="/login">Login</NavLink> 
-        <NavLink href="/posts">Posts</NavLink> /events-->
-
-    </nav>
-</div>
-
