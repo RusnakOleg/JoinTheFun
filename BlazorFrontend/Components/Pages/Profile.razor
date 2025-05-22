@@ -109,7 +109,7 @@ else
                 <p>@post.Content</p>
                 @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
                 {
-                    <img src="@GetParsedImage(post.ImageUrl)" class="img-fluid" />
+                    <img src="@GetParsedImage(post.ImageUrl)" class="img-fluid" width="350" />
                 }
 
                 <p>
@@ -173,9 +173,16 @@ else
                         </div>
 
                         <div class="mb-2">
-                            <label>URL зображення:</label>
-                            <InputText @bind-Value="newPost.ImageUrl" class="form-control" />
+                            <label>Зображення:</label>
+                            <InputFile OnChange="HandlePostImageUpload" />
+                            @if (!string.IsNullOrEmpty(newPost.ImageUrl))
+                            {
+                                <div class="mt-2">
+                                    <img src="@GetParsedImage(newPost.ImageUrl)" class="img-fluid" />
+                                </div>
+                            }
                         </div>
+
 
                         <button class="btn btn-primary" type="submit">Опублікувати</button>
                         <button class="btn btn-secondary ms-2" @onclick="ClosePostModal" type="button">Скасувати</button>
@@ -398,4 +405,22 @@ else
             editModel!.AvatarUrl = base64;
         }
     }
+
+    private async Task HandlePostImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null)
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // max 5MB
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            string base64 = Convert.ToBase64String(bytes);
+
+            newPost.ImageUrl = base64;
+        }
+    }
+
+
 }

@@ -67,7 +67,7 @@ else
                 <p>@post.Content</p>
                 @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
                 {
-                    <img src="@post.ImageUrl" class="img-fluid" />
+                    <img src="@GetParsedImage(post.ImageUrl)" class="img-fluid" width="350" />
                 }
 
                 <p>
