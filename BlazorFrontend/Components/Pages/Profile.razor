@@ -1,10 +1,20 @@
 ﻿@page "/profile"
+@using BlazorFrontend.DTO
+@using BlazorFrontend.DTO.Comments
+@using BlazorFrontend.DTO.Events
 @using BlazorFrontend.DTO.Interests
+@using BlazorFrontend.DTO.Likes
+@using BlazorFrontend.DTO.Posts
 @using BlazorFrontend.DTO.Profiles
 @using BlazorFrontend.Helpers
 @using BlazorFrontend.Services.Interfaces
+
 @inject IProfileService ProfileService
 @inject IInterestService InterestService
+@inject IPostService PostService
+@inject ICommentService CommentService
+@inject ILikeService LikeService
+@inject IEventService EventService
 
 @rendermode InteractiveServer
 
@@ -16,34 +26,22 @@
 }
 else
 {
-    <div class="mb-3">
-        <strong>Ім’я користувача:</strong> @profile.Username
+    <div class="card p-3 shadow mb-4">
+        <img src="@profile.AvatarUrl" width="100" />
+        <h4>@profile.Username</h4>
+        <p><strong>@profile.City, @profile.Age</strong></p>
+        <p>@profile.Description</p>
+        <p><strong>Інтереси:</strong> @string.Join(", ", profile.Interests)</p>
     </div>
 
     <EditForm Model="editModel" OnValidSubmit="UpdateProfile">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
-        <div class="mb-2">
-            <label>Місто:</label>
-            <InputText @bind-Value="editModel.City" class="form-control" />
-        </div>
-
-        <div class="mb-2">
-            <label>Вік:</label>
-            <InputNumber @bind-Value="editModel.Age" class="form-control" />
-        </div>
-
-        <div class="mb-2">
-            <label>Опис:</label>
-            <InputTextArea @bind-Value="editModel.Description" class="form-control" />
-        </div>
-
-        <div class="mb-2">
-            <label>Аватар (URL):</label>
-            <InputText @bind-Value="editModel.AvatarUrl" class="form-control" />
-        </div>
-
+        <div class="mb-2"><label>Місто:</label> <InputText @bind-Value="editModel.City" class="form-control" /></div>
+        <div class="mb-2"><label>Вік:</label> <InputNumber @bind-Value="editModel.Age" class="form-control" /></div>
+        <div class="mb-2"><label>Опис:</label> <InputTextArea @bind-Value="editModel.Description" class="form-control" /></div>
+        <div class="mb-2"><label>Аватар (URL):</label> <InputText @bind-Value="editModel.AvatarUrl" class="form-control" /></div>
         <div class="mb-2">
             <label>Стать:</label>
             <InputSelect @bind-Value="editModel.Gender" class="form-control">
@@ -51,7 +49,6 @@ else
                 <option value="Female">Жіноча</option>
             </InputSelect>
         </div>
-
         <div class="mb-2">
             <label>Інтереси:</label>
             @foreach (var interest in allInterests)
@@ -64,20 +61,97 @@ else
                 </div>
             }
         </div>
-
         <button class="btn btn-primary mt-2">Зберегти зміни</button>
     </EditForm>
+
+    <hr />
+
+    <h5>Мої події</h5>
+    @if (userEvents.Count == 0)
+    {
+        <p>Подій не знайдено.</p>
+    }
+    else
+    {
+        @foreach (var ev in userEvents)
+        {
+            <div class="card mb-2 p-2">
+                <strong>@ev.Title</strong> – @ev.Location (@ev.StartTime.ToShortDateString())
+            </div>
+        }
+    }
+
+    <h5 class="mt-4">Мої пости</h5>
+    @if (posts.Count == 0)
+    {
+        <p>Постів немає.</p>
+    }
+    else
+    {
+        @foreach (var post in posts)
+        {
+            <div class="card p-3 mb-3 shadow">
+                <p><strong>@post.AuthorUsername</strong></p>
+                <p>@post.Content</p>
+                @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
+                {
+                    <img src="@post.ImageUrl" class="img-fluid" />
+                }
+
+                <p>
+                    👍 @post.LikeCount | 💬 @post.CommentCount
+                    <button class="btn btn-sm btn-outline-primary ms-2" @onclick="() => ToggleLike(post.PostId)">Лайк</button>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => ToggleComments(post.PostId)">
+                        @(visibleComments.Contains(post.PostId) ? "Сховати коментарі" : "Показати коментарі")
+                    </button>
+                </p>
+
+                @if (visibleComments.Contains(post.PostId))
+                {
+                    <div class="mt-2">
+                        @if (comments.ContainsKey(post.PostId))
+                        {
+                            @foreach (var comment in comments[post.PostId])
+                            {
+                                <div class="border p-2 mb-1">
+                                    <strong>@comment.AuthorUsername:</strong> @comment.Content
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p><em>Завантаження коментарів...</em></p>
+                        }
+                    </div>
+                }
+                @{
+                    var commentModel = newComments[post.PostId];
+                }
+
+                <EditForm Model="commentModel" OnValidSubmit="() => SubmitComment(post.PostId)">
+                    <InputText @bind-Value="commentModel.Content" class="form-control" />
+                    <button class="btn btn-sm btn-success mt-1">Надіслати</button>
+                </EditForm>
+                
+            </div>
+        }
+    }
 }
 
 @code {
     private ProfileDto? profile;
     private UpdateProfileDto? editModel;
     private List<InterestDto> allInterests = new();
+    private List<EventDto> userEvents = new();
+    private List<PostDto> posts = new();
+    private Dictionary<int, CreatePostCommentDto> newComments = new();
+    private Dictionary<int, List<PostCommentDto>> comments = new();
+    private HashSet<int> visibleComments = new();
+    private string currentUserId = UserContext.UserId;
 
     protected override async Task OnInitializedAsync()
     {
-        var userId = UserContext.UserId;
-        profile = await ProfileService.GetByUserIdAsync(userId);
+        profile = await ProfileService.GetByUserIdAsync(currentUserId);
         allInterests = await InterestService.GetAllAsync();
 
         if (profile != null)
@@ -89,7 +163,7 @@ else
                     Description = profile.Description,
                     AvatarUrl = profile.AvatarUrl,
                     Gender = profile.Gender,
-                    InterestIds = new List<int>()
+                    InterestIds = new()
                 };
 
             foreach (var interestName in profile.Interests)
@@ -97,6 +171,22 @@ else
                 var interest = allInterests.FirstOrDefault(i => i.Name == interestName);
                 if (interest != null)
                     editModel.InterestIds.Add(interest.InterestId);
+            }
+
+            posts = (await PostService.GetAllAsync())
+                .Where(p => p.AuthorUsername == profile.Username).ToList();
+
+            userEvents = (await EventService.GetAllAsync())
+                .Where(e => e.CreatorUsername == profile.Username).ToList();
+
+            foreach (var post in posts)
+            {
+                newComments[post.PostId] = new CreatePostCommentDto
+                    {
+                        PostId = post.PostId,
+                        UserId = currentUserId,
+                        Content = ""
+                    };
             }
         }
     }
@@ -109,21 +199,58 @@ else
 
     private void ToggleInterest(int id, bool selected)
     {
-        if (selected)
-        {
-            if (!editModel!.InterestIds.Contains(id))
-                editModel.InterestIds.Add(id);
-        }
-        else
-        {
+        if (selected && !editModel!.InterestIds.Contains(id))
+            editModel.InterestIds.Add(id);
+        else if (!selected)
             editModel!.InterestIds.Remove(id);
-        }
     }
 
     private async Task UpdateProfile()
     {
-        var userId = UserContext.UserId;
-        await ProfileService.UpdateAsync(editModel!, userId);
-        profile = await ProfileService.GetByUserIdAsync(userId);
+        await ProfileService.UpdateAsync(editModel!, currentUserId);
+        profile = await ProfileService.GetByUserIdAsync(currentUserId);
+    }
+
+    private async Task ToggleLike(int postId)
+    {
+        var dto = new PostLikeDto { PostId = postId, UserId = currentUserId };
+        bool liked = await LikeService.IsLikedAsync(postId, currentUserId);
+
+        if (liked)
+            await LikeService.UnlikeAsync(dto);
+        else
+            await LikeService.LikeAsync(dto);
+
+        await RefreshPosts();
+    }
+
+    private async Task ToggleComments(int postId)
+    {
+        if (visibleComments.Contains(postId))
+            visibleComments.Remove(postId);
+        else
+        {
+            visibleComments.Add(postId);
+            if (!comments.ContainsKey(postId))
+                comments[postId] = await CommentService.GetByPostIdAsync(postId);
+        }
+    }
+
+    private async Task SubmitComment(int postId)
+    {
+        var dto = newComments[postId];
+        if (string.IsNullOrWhiteSpace(dto.Content)) return;
+
+        await CommentService.AddAsync(dto);
+        dto.Content = "";
+
+        comments[postId] = await CommentService.GetByPostIdAsync(postId);
+        await RefreshPosts();
+    }
+
+    private async Task RefreshPosts()
+    {
+        posts = (await PostService.GetAllAsync())
+            .Where(p => p.AuthorUsername == profile?.Username).ToList();
     }
 }
