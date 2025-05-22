@@ -9,7 +9,7 @@ namespace JoinTheFun.DAL.Repositories.Interfaces
 {
     public interface IUserInterestRepository
     {
-        Task<IEnumerable<Interest>> GetInterestsByProfileIdAsync(int profileId);
+        Task<IEnumerable<UserInterest>> GetInterestsByProfileIdAsync(int profileId);
         Task AddAsync(UserInterest interest);
         Task RemoveAsync(UserInterest interest);
     }

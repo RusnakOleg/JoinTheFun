@@ -13,11 +13,16 @@ namespace JoinTheFun.BLL.Services
     public class ProfileService : IProfileService
     {
         private readonly IProfileRepository _repo;
+        private readonly IUserInterestRepository _userInterestRepo;
         private readonly IMapper _mapper;
 
-        public ProfileService(IProfileRepository repo, IMapper mapper)
+        public ProfileService(
+            IProfileRepository repo,
+            IUserInterestRepository userInterestRepo,
+            IMapper mapper)
         {
             _repo = repo;
+            _userInterestRepo = userInterestRepo;
             _mapper = mapper;
         }
 
@@ -54,7 +59,26 @@ namespace JoinTheFun.BLL.Services
 
             _mapper.Map(dto, profile);
             await _repo.UpdateAsync(profile);
+
+            // 🔴 Видаляємо старі інтереси
+            var existing = await _userInterestRepo.GetInterestsByProfileIdAsync(profile.Id);
+            foreach (var oldInterest in existing)
+            {
+                await _userInterestRepo.RemoveAsync(oldInterest);
+            }
+
+            // 🟢 Додаємо нові
+            foreach (var interestId in dto.InterestIds)
+            {
+                var newInterest = new DAL.Entities.UserInterest
+                {
+                    ProfileId = profile.Id,
+                    InterestId = interestId
+                };
+                await _userInterestRepo.AddAsync(newInterest);
+            }
         }
+
 
         public async Task<IEnumerable<ProfileDto>> GetAllAsync()
         {

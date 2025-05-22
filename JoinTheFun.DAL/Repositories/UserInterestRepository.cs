@@ -15,11 +15,11 @@ namespace JoinTheFun.DAL.Repositories
         private readonly ApplicationDbContext _context;
         public UserInterestRepository(ApplicationDbContext context) => _context = context;
 
-        public async Task<IEnumerable<Interest>> GetInterestsByProfileIdAsync(int profileId) =>
-            await _context.UserInterests
-                .Where(ui => ui.ProfileId == profileId)
-                .Select(ui => ui.Interest)
-                .ToListAsync();
+        public async Task<IEnumerable<UserInterest>> GetInterestsByProfileIdAsync(int profileId) =>
+    await _context.UserInterests
+        .Where(ui => ui.ProfileId == profileId)
+        .ToListAsync();
+
 
         public async Task AddAsync(UserInterest interest)
         {
