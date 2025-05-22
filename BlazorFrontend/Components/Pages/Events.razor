@@ -39,6 +39,7 @@ else
             <p><strong>Місце:</strong> @ev.Location</p>
             <p><strong>Час:</strong> @ev.StartTime.ToString("g")</p>
             <p><strong>Учасників:</strong> @ev.ParticipantCount</p>
+            <p><strong>Автор події:</strong> @ev.CreatorUsername</p>
 
             @if (joinedEventIds.Contains(ev.EventId))
             {
