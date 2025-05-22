@@ -39,10 +39,17 @@ namespace JoinTheFun.DAL.Repositories
             var post = await _context.Posts.FindAsync(id);
             if (post != null)
             {
+                var comments = _context.PostComments.Where(c => c.PostId == id);
+                var likes = _context.PostLikes.Where(l => l.PostId == id);
+
+                _context.PostComments.RemoveRange(comments);
+                _context.PostLikes.RemoveRange(likes);
                 _context.Posts.Remove(post);
+
                 await _context.SaveChangesAsync();
             }
         }
+
 
         public async Task<IEnumerable<Post>> GetPostsByFollowingsAsync(string userId)
         {

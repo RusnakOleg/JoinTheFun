@@ -13,5 +13,7 @@ namespace JoinTheFun.BLL.Services.Interfaces
         Task<IEnumerable<EventDto>> GetByLocationAsync(string location);
         Task<IEnumerable<EventDto>> GetByUserInterestsAsync(string userId);
         Task CreateAsync(CreateEventDto dto);
+        Task DeleteAsync(int id);
+
     }
 }

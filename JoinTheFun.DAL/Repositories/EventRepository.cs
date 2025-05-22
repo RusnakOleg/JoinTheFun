@@ -32,10 +32,16 @@ namespace JoinTheFun.DAL.Repositories
             var ev = await _context.Events.FindAsync(id);
             if (ev != null)
             {
+                // Видалити учасників
+                var participants = _context.EventParticipants.Where(p => p.EventId == id);
+                _context.EventParticipants.RemoveRange(participants);
+
+                // Тепер саму подію
                 _context.Events.Remove(ev);
                 await _context.SaveChangesAsync();
             }
         }
+
 
         public async Task<IEnumerable<Event>> GetByLocationAsync(string location)
         {

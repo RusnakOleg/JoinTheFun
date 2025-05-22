@@ -8,5 +8,7 @@ namespace BlazorFrontend.Services.Interfaces
         Task<List<EventDto>> GetByLocationAsync(string city);
         Task<List<EventDto>> GetByUserInterestsAsync(string userId);
         Task<bool> CreateAsync(CreateEventDto dto);
+        Task DeleteAsync(int id);
+
     }
 }

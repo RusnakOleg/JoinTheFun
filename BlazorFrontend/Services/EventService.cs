@@ -33,5 +33,10 @@ namespace BlazorFrontend.Services
             var response = await _http.PostAsJsonAsync("events", dto);
             return response.IsSuccessStatusCode;
         }
+        public async Task DeleteAsync(int id)
+        {
+            await _http.DeleteAsync($"events/{id}");
+        }
+
     }
 }

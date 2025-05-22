@@ -54,5 +54,13 @@ namespace JoinTheFun.API.Controllers
             await _eventService.CreateAsync(dto);
             return Ok(new { message = "Подія створена успішно" });
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _eventService.DeleteAsync(id);
+            return Ok(new { message = "Подія видалена успішно" });
+        }
+
     }
 }

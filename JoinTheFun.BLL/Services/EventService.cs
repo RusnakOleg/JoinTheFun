@@ -49,5 +49,10 @@ namespace JoinTheFun.BLL.Services
             var entity = _mapper.Map<Event>(dto);
             await _eventRepo.AddAsync(entity);
         }
+        public async Task DeleteAsync(int id)
+        {
+            await _eventRepo.DeleteAsync(id);
+        }
+
     }
 }
