@@ -43,7 +43,8 @@ namespace JoinTheFun.BLL.Mapping
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.ApplicationUser.UserName));
 
             CreateMap<UpdateProfileDto, DAL.Entities.Profile>()
-                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null)); // тільки не-null
+                .ForMember(x => x.AvatarUrl, opt => opt.MapFrom((src) => ConvertBase64ToBytes(src.AvatarUrl)))
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
             // Comment
             CreateMap<PostComment, PostCommentDto>()
@@ -74,6 +75,20 @@ namespace JoinTheFun.BLL.Mapping
             CreateMap<RemoveEventParticipantDto, EventParticipant>();
 
 
+        }
+
+        public static byte[] ConvertBase64ToBytes(string base64)
+        {
+            if (string.IsNullOrWhiteSpace(base64))
+                return null;
+
+            // If the UI sends "data:image/png;base64,XXXX", strip the header
+            var commaIndex = base64.IndexOf(',');
+
+            if (commaIndex >= 0)
+                base64 = base64.Substring(commaIndex + 1);
+
+            return Convert.FromBase64String(base64);
         }
     }
 }

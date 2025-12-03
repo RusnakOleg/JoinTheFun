@@ -4,6 +4,7 @@ using JoinTheFun.BLL.Services.Interfaces;
 using JoinTheFun.DAL.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -82,7 +83,10 @@ namespace JoinTheFun.BLL.Services
 
         public async Task<IEnumerable<ProfileDto>> GetAllAsync()
         {
+            var stopwatch = Stopwatch.StartNew();
             var profiles = await _repo.GetAllAsync();
+            stopwatch.Stop();
+            Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds}");
             return _mapper.Map<IEnumerable<ProfileDto>>(profiles);
         }
 

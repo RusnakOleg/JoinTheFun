@@ -4,7 +4,7 @@ namespace BlazorFrontend.Helpers
 {
     public static class UserContext
     {
-        public static string UserId => "5ab3ca2e-2d7e-4856-8193-6c30df6c525b";
+        public static string UserId => "d895f5f7-6cc7-454c-a209-532ebf5eb6ab";
     }
 }
 

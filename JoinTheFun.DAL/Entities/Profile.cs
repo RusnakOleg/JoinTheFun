@@ -21,7 +21,7 @@ namespace JoinTheFun.DAL.Entities
         public int Age { get; set; }
         public string City { get; set; }
         public string Description { get; set; }
-        public string AvatarUrl { get; set; }
+        public byte[] AvatarUrl { get; set; }
 
         public Gender Gender { get; set; }
 

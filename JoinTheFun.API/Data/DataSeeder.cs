@@ -12,25 +12,25 @@ namespace JoinTheFun.API.Data
             ApplicationDbContext context)
         {
             // 1. Користувачі
-            var anna = await userManager.FindByNameAsync("anna");
+            var anna = await userManager.FindByNameAsync("anna_shevchenko");
             if (anna == null)
             {
                 anna = new ApplicationUser
                 {
-                    UserName = "anna",
-                    Email = "anna@email.com",
+                    UserName = "anna_shevchenko",
+                    Email = "anna_shevchenko@email.com",
                     EmailConfirmed = true
                 };
                 await userManager.CreateAsync(anna, "Anna123!");
             }
 
-            var oleg = await userManager.FindByNameAsync("oleg");
+            var oleg = await userManager.FindByNameAsync("oleg_rusnak");
             if (oleg == null)
             {
                 oleg = new ApplicationUser
                 {
-                    UserName = "oleg",
-                    Email = "oleg@email.com",
+                    UserName = "oleg_rusnak",
+                    Email = "oleg_rusnak@email.com",
                     EmailConfirmed = true
                 };
                 await userManager.CreateAsync(oleg, "Oleg123!");
@@ -43,9 +43,9 @@ namespace JoinTheFun.API.Data
                 {
                     UserId = anna.Id,
                     Age = 25,
-                    City = "Lviv",
+                    City = "Львів",
                     Description = "Люблю фото та каву",
-                    AvatarUrl = "mmm",
+                    //AvatarUrl = "mmm",
                     Gender = Gender.Female
                 };
 
@@ -53,9 +53,9 @@ namespace JoinTheFun.API.Data
                 {
                     UserId = oleg.Id,
                     Age = 28,
-                    City = "Kyiv",
+                    City = "Київ",
                     Description = "Геймер і турист",
-                    AvatarUrl = "mmm",
+                    //AvatarUrl = "mmm",
                     Gender = Gender.Male
                 };
 
