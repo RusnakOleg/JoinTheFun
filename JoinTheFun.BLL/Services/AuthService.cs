@@ -50,7 +50,7 @@ namespace JoinTheFun.BLL.Services
                 City = "",
                 Age = 0,
                 Gender = Gender.Male, // або Female — за замовчуванням
-                //AvatarUrl = ""
+                AvatarUrl = Array.Empty<byte>()
             };
 
             await _profileRepo.AddAsync(profile);

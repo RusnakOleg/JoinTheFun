@@ -85,14 +85,14 @@ namespace JoinTheFun.API.Data
                 {
                     UserId = anna.Id,
                     Content = "Крута прогулянка по Карпатах!",
-                    ImageUrl = "mmm",
+                    //ImageUrl = "mmm",
                     CreatedAt = DateTime.UtcNow
                 };
                 var post2 = new Post
                 {
                     UserId = oleg.Id,
                     Content = "Граємо в CS GO — хто з нами?",
-                    ImageUrl = "mmm",
+                    //ImageUrl = "mmm",
                     CreatedAt = DateTime.UtcNow
                 };
 

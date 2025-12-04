@@ -30,7 +30,10 @@ namespace JoinTheFun.BLL.Mapping
                 .ForMember(dest => dest.LikeCount, opt => opt.MapFrom(src => src.Likes.Count))
                 .ForMember(dest => dest.CommentCount, opt => opt.MapFrom(src => src.Comments.Count));
 
-            CreateMap<CreatePostDto, Post>();
+            CreateMap<CreatePostDto, Post>()
+                .ForMember(x => x.ImageUrl, opt => opt.MapFrom((src) => ConvertBase64ToBytes(src.ImageUrl)))
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
 
             // Profile
             CreateMap<DAL.Entities.Profile, ProfileDto>()

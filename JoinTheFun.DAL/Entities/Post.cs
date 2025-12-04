@@ -16,7 +16,7 @@ namespace JoinTheFun.DAL.Entities
         public ApplicationUser User { get; set; }
 
         public string Content { get; set; }
-        public string ImageUrl { get; set; }
+        public byte[] ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<PostLike> Likes { get; set; }

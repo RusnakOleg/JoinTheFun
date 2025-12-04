@@ -10,7 +10,7 @@ namespace JoinTheFun.BLL.DTO.Posts
     {
         public int PostId { get; set; }
         public string Content { get; set; }
-        public string ImageUrl { get; set; }
+        public byte[] ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public string AuthorUsername { get; set; }
         public int LikeCount { get; set; }
