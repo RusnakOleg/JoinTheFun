@@ -1,4 +1,5 @@
 ﻿using JoinTheFun.BLL.DTO.Comments;
+using JoinTheFun.BLL.Exceptions;
 using JoinTheFun.BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,8 +32,19 @@ namespace JoinTheFun.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePostCommentDto dto)
         {
-            await _commentService.AddAsync(dto);
-            return Ok(new { message = "Коментар додано" });
+            try
+            {
+                await _commentService.AddAsync(dto);
+                return Ok(new { message = "Коментар додано" });
+            }
+            catch (ToxicCommentException ex)
+            {
+                // 400, застосунок не падає, фронт отримає нормальне повідомлення
+                return BadRequest(new { message = ex.Message });
+            }
+
+            //await _commentService.AddAsync(dto);
+            //return Ok(new { message = "Коментар додано" });
         }
 
         /// <summary>

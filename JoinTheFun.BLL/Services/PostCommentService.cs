@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using JoinTheFun.BLL.DTO.Comments;
+using JoinTheFun.BLL.Exceptions;
 using JoinTheFun.BLL.Services.Interfaces;
+using JoinTheFun.BLL.Services.Interfaces.JoinTheFun.BLL.Services.Interfaces;
 using JoinTheFun.DAL.Entities;
 using JoinTheFun.DAL.Repositories.Interfaces;
 using System;
@@ -15,11 +17,14 @@ namespace JoinTheFun.BLL.Services
     {
         private readonly IPostCommentRepository _repo;
         private readonly IMapper _mapper;
+        private readonly ToxicityApiClient _toxicity;
 
-        public PostCommentService(IPostCommentRepository repo, IMapper mapper)
+
+        public PostCommentService(IPostCommentRepository repo, IMapper mapper, ToxicityApiClient toxicity)
         {
             _repo = repo;
             _mapper = mapper;
+            _toxicity = toxicity;
         }
 
         public async Task<IEnumerable<PostCommentDto>> GetByPostIdAsync(int postId)
@@ -30,6 +35,13 @@ namespace JoinTheFun.BLL.Services
 
         public async Task AddAsync(CreatePostCommentDto dto)
         {
+            // Перевіряємо токсичність через Python API
+            int toxic = await _toxicity.PredictAsync(dto.Content);
+
+            if (toxic == 1)
+            {
+                throw new ToxicCommentException("Коментар містить токсичний зміст і не може бути доданий.");
+            }
             var entity = _mapper.Map<PostComment>(dto);
 
             //  ЗАБЕЗПЕЧ, що EF не намагається вставити зв’язані сутності

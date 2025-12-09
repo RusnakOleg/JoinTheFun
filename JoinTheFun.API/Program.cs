@@ -12,6 +12,7 @@ using JoinTheFun.BLL.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using JoinTheFun.BLL.Services.Interfaces.JoinTheFun.BLL.Services.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,18 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
+builder.Services.AddSingleton<IToxicityService>(sp =>
+{
+    string modelPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "toxic_model2.onnx");
+    return new ToxicityService(modelPath);
+});
+
+builder.Services.AddSingleton<ITextCleanerService, TextCleanerService>();
+
+builder.Services.AddHttpClient<ToxicityApiClient>();
+
+
 
 
 // Add services to the container.
@@ -156,7 +169,7 @@ using (var scope = app.Services.CreateScope())
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     var dbContext = services.GetRequiredService<ApplicationDbContext>();
 
-    await DataSeeder.SeedAsync(userManager, roleManager, dbContext);
+    //await DataSeeder.SeedAsync(userManager, roleManager, dbContext);
 }
 
 
