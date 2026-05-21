@@ -11,5 +11,6 @@ namespace JoinTheFun.BLL.Services.Interfaces
     {
         Task<IEnumerable<InterestDto>> GetAllAsync();
         Task CreateAsync(CreateInterestDto dto);
+        Task DeleteAsync(int id);
     }
 }

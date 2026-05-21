@@ -26,6 +26,16 @@ namespace JoinTheFun.DAL.Repositories
             _context.Interests.Add(interest);
             await _context.SaveChangesAsync();
         }
+        public async Task DeleteAsync(int id)
+        {
+            var interest = await _context.Interests.FindAsync(id);
+
+            if (interest == null)
+                throw new Exception("Interest not found");
+
+            _context.Interests.Remove(interest);
+            await _context.SaveChangesAsync();
+        }
 
     }
 }

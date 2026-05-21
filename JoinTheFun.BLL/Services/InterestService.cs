@@ -34,5 +34,10 @@ namespace JoinTheFun.BLL.Services
             // Перевірку на унікальність можеш додати тут
             await _repo.AddAsync(interest);
         }
+        public async Task DeleteAsync(int id)
+        {
+            await _repo.DeleteAsync(id);
+        }
+        
     }
 }

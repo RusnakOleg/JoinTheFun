@@ -34,5 +34,12 @@ namespace JoinTheFun.API.Controllers
             await _interestService.CreateAsync(dto);
             return Ok(new { message = "Інтерес створено" });
         }
+        
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _interestService.DeleteAsync(id);
+            return Ok(new { message = "Інтерес видалено" });
+        }
     }
 }
