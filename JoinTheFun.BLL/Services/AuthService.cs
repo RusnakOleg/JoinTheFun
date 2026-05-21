@@ -42,6 +42,9 @@ namespace JoinTheFun.BLL.Services
             if (!result.Succeeded)
                 return false;
 
+            // При реєстрації за замовчуванням даємо роль "User"
+            await _userManager.AddToRoleAsync(user, "User");
+
             // створення порожнього профілю
             var profile = new Profile
             {
@@ -49,7 +52,7 @@ namespace JoinTheFun.BLL.Services
                 Description = "",
                 City = "",
                 Age = 0,
-                Gender = Gender.Male, // або Female — за замовчуванням
+                Gender = Gender.Male,
                 AvatarUrl = Array.Empty<byte>()
             };
 
@@ -62,8 +65,14 @@ namespace JoinTheFun.BLL.Services
             var user = await _userManager.FindByNameAsync(dto.Username);
             if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
                 return null;
-
-            var token = GenerateJwtToken(user);
+            
+            //  Перевіряємо, чи користувач забанений
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                throw new Exception("Ваш акаунт заблоковано адміністратором.");
+            }
+            
+            var token = await GenerateJwtTokenAsync(user); 
 
             return new AuthResponseDto
             {
@@ -72,14 +81,23 @@ namespace JoinTheFun.BLL.Services
                 Username = user.UserName
             };
         }
-
-        private string GenerateJwtToken(ApplicationUser user)
+        
+        private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName)
-        };
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName)
+            };
+
+            // Отримуємо всі ролі користувача з бази даних
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // Додаємо кожну роль у claims токена
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -87,7 +105,7 @@ namespace JoinTheFun.BLL.Services
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
-                claims: claims,
+                claims: claims, // Передаємо наш список ліста claims
                 expires: DateTime.UtcNow.AddMinutes(int.Parse(_config["Jwt:ExpiresInMinutes"]!)),
                 signingCredentials: creds
             );
@@ -95,5 +113,4 @@ namespace JoinTheFun.BLL.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
-
 }

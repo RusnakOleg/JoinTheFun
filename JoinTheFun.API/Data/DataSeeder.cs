@@ -1,6 +1,7 @@
 ﻿using JoinTheFun.DAL.Context;
 using JoinTheFun.DAL.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace JoinTheFun.API.Data
 {
@@ -11,6 +12,17 @@ namespace JoinTheFun.API.Data
             RoleManager<IdentityRole> roleManager,
             ApplicationDbContext context)
         {
+            // 0. Створення ролей (Новий блок)
+            string[] roleNames = { "Admin", "Moderator", "User" };
+            foreach (var roleName in roleNames)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
+                if (!roleExist)
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
+
             // 1. Користувачі
             var anna = await userManager.FindByNameAsync("anna_shevchenko");
             if (anna == null)
@@ -22,6 +34,9 @@ namespace JoinTheFun.API.Data
                     EmailConfirmed = true
                 };
                 await userManager.CreateAsync(anna, "Anna123!");
+                
+                // Надаємо Анні роль звичайного користувача
+                await userManager.AddToRoleAsync(anna, "User");
             }
 
             var oleg = await userManager.FindByNameAsync("oleg_rusnak");
@@ -34,9 +49,12 @@ namespace JoinTheFun.API.Data
                     EmailConfirmed = true
                 };
                 await userManager.CreateAsync(oleg, "Oleg123!");
+                
+                // Робимо Олега Адміністратором додатка
+                await userManager.AddToRoleAsync(oleg, "Admin");
             }
 
-            // 2. Профілі
+            // 2. Профілі (Твоя існуюча логіка без змін)
             if (!context.Profiles.Any())
             {
                 var profileAnna = new Profile
@@ -45,7 +63,7 @@ namespace JoinTheFun.API.Data
                     Age = 25,
                     City = "Львів",
                     Description = "Люблю фото та каву",
-                    //AvatarUrl = "mmm",
+                    AvatarUrl = Array.Empty<byte>(),
                     Gender = Gender.Female
                 };
 
@@ -55,7 +73,7 @@ namespace JoinTheFun.API.Data
                     Age = 28,
                     City = "Київ",
                     Description = "Геймер і турист",
-                    //AvatarUrl = "mmm",
+                    AvatarUrl = Array.Empty<byte>(),
                     Gender = Gender.Male
                 };
 
@@ -85,14 +103,14 @@ namespace JoinTheFun.API.Data
                 {
                     UserId = anna.Id,
                     Content = "Крута прогулянка по Карпатах!",
-                    //ImageUrl = "mmm",
+                    ImageUrl = Array.Empty<byte>(),
                     CreatedAt = DateTime.UtcNow
                 };
                 var post2 = new Post
                 {
                     UserId = oleg.Id,
                     Content = "Граємо в CS GO — хто з нами?",
-                    //ImageUrl = "mmm",
+                    ImageUrl = Array.Empty<byte>(),
                     CreatedAt = DateTime.UtcNow
                 };
 

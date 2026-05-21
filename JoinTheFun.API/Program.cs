@@ -12,6 +12,7 @@ using JoinTheFun.BLL.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using JoinTheFun.API.Middleware;
 using JoinTheFun.BLL.Services.Interfaces.JoinTheFun.BLL.Services.Interfaces;
 
 
@@ -21,7 +22,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClient", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // адреса React
+        policy.WithOrigins("http://localhost:5173") // пїЅпїЅпїЅпїЅпїЅпїЅ React
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -82,6 +83,7 @@ builder.Services.AddScoped<IInterestService, InterestService>();
 builder.Services.AddScoped<IUserInterestService, UserInterestService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 // ===== JWT =====
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -120,7 +122,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Введіть 'Bearer' та пробіл і ваш JWT токен"
+        Description = "пїЅпїЅпїЅпїЅпїЅпїЅ 'Bearer' пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ JWT пїЅпїЅпїЅпїЅпїЅ"
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -157,6 +159,8 @@ app.UseHttpsRedirection();
 app.UseCors("AllowClient");
 
 app.UseAuthentication();
+
+app.UseMiddleware<UserBanCheckMiddleware>();
 
 app.UseAuthorization();
 

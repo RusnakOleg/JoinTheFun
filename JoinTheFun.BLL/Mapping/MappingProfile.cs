@@ -43,7 +43,8 @@ namespace JoinTheFun.BLL.Mapping
                 ? src.Interests.Select(i => i.Interest.Name).ToList()
                 : new List<string>()
                 ))
-                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.ApplicationUser.UserName));
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.ApplicationUser.UserName))
+                .ForMember(dest => dest.LockoutEnd, opt => opt.MapFrom(src => src.ApplicationUser.LockoutEnd)); ;
 
             CreateMap<UpdateProfileDto, DAL.Entities.Profile>()
                 .ForMember(x => x.AvatarUrl, opt => opt.MapFrom((src) => ConvertBase64ToBytes(src.AvatarUrl)))

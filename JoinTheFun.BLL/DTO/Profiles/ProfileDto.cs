@@ -16,6 +16,7 @@ namespace JoinTheFun.BLL.DTO.Profiles
         public string Gender { get; set; }
         public List<string> Interests { get; set; }
         public string Username { get; set; }
+        public DateTimeOffset? LockoutEnd { get; set; }
     }
 
 }
