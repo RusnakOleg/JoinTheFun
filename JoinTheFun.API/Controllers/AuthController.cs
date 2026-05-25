@@ -30,8 +30,28 @@ namespace JoinTheFun.API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> Login(LoginDto dto)
         {
-            var result = await _authService.LoginAsync(dto);
-            return result == null ? Unauthorized() : Ok(result);
+            try
+            {
+                var result = await _authService.LoginAsync(dto);
+        
+                // Якщо результат null — значить користувача не існує або пароль невірний
+                if (result == null)
+                {
+                    return Unauthorized(new { message = "Невірне ім'я користувача або пароль." });
+                }
+
+                return Ok(result);
+            }
+            catch (ApplicationException ex)
+            {
+                // Сюди ми потрапимо, якщо пароль ПРАВИЛЬНИЙ, але користувач забанений
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                // На випадок інших непередбачуваних помилок
+                return StatusCode(500, new { message = "Сталася помилка на сервері." });
+            }
         }
     }
 

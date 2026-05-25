@@ -61,26 +61,31 @@ namespace JoinTheFun.BLL.Services
         }
 
         public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
-        {
-            var user = await _userManager.FindByNameAsync(dto.Username);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
-                return null;
-            
-            //  Перевіряємо, чи користувач забанений
-            if (await _userManager.IsLockedOutAsync(user))
-            {
-                throw new Exception("Ваш акаунт заблоковано адміністратором.");
-            }
-            
-            var token = await GenerateJwtTokenAsync(user); 
+{
+    var user = await _userManager.FindByNameAsync(dto.Username);
+    
+    // Якщо користувача немає АБО пароль невірний — повертаємо null 
+    // (фронтенд покаже "Невірний логін або пароль")
+    if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
+        return null;
+    
+    // Сюди код дійде, ТІЛЬКИ якщо пароль ПРАВИЛЬНИЙ.
+    // Тепер перевіряємо, чи він забанений:
+    if (await _userManager.IsLockedOutAsync(user))
+    {
+        // Кидаємо чітке повідомлення
+        throw new ApplicationException("Ваш акаунт заблоковано адміністратором.");
+    }
+    
+    var token = await GenerateJwtTokenAsync(user); 
 
-            return new AuthResponseDto
-            {
-                Token = token,
-                UserId = user.Id,
-                Username = user.UserName
-            };
-        }
+    return new AuthResponseDto
+    {
+        Token = token,
+        UserId = user.Id,
+        Username = user.UserName
+    };
+}
         
         private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
         {
