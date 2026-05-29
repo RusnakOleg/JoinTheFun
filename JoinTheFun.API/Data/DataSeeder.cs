@@ -1,4 +1,5 @@
-﻿using JoinTheFun.DAL.Context;
+﻿using Bogus;
+using JoinTheFun.DAL.Context;
 using JoinTheFun.DAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,169 +8,303 @@ namespace JoinTheFun.API.Data
 {
     public static class DataSeeder
     {
+        // Набори реальних українських слів та фраз для генерації
+        private static readonly string[] UkrWords = {
+            "привіт", "фестиваль", "зустріч", "кава", "програмування", "дизайн", "вечірка", "спорт", 
+            "прогулянка", "кіно", "музика", "книга", "спільнота", "розробка", "ідея", "проєкт", 
+            "мистецтво", "фотографія", "подорож", "активність", "відпочинок", "друзі", "натхнення"
+        };
+
+        private static readonly string[] UkrSentences = {
+            "Чудовий день для того, щоб дізнатися щось нове та корисне.",
+            "Зустрічаємось у центрі міста біля головного входу.",
+            "Не забудьте взяти з собою гарний настрій та друзів!",
+            "Обговорюємо нові тренди у сфері сучасних технологій.",
+            "Практичний воркшоп для всіх, хто хоче розвиватися.",
+            "Приєднуйтесь до нашої великої та дружньої команди.",
+            "Ділимося досвідом, п'ємо смачну каву та спілкуємося.",
+            "Кількість місць обмежена, тому реєструйтеся заздалегідь.",
+            "Сьогодні був неймовірний день, повний яскравих емоцій та нових знайомств."
+        };
+
+        private static readonly string[] EventTitles = {
+            "Воркшоп з веб-дизайну та UI/UX",
+            "Кіновечір просто неба",
+            "Благодійний забіг ради перемоги",
+            "ІТ-мітап: Тренди розробки 2026",
+            "Фотопрогулянка старим містом",
+            "Турнір з настільних ігор",
+            "Музичний джем-сейшн",
+            "Літературний клуб: обговорення новинок",
+            "Йога-пікнік у парку",
+            "Майстер-клас з живопису",
+            "Хакатон для молодих розробників"
+        };
+
         public static async Task SeedAsync(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ApplicationDbContext context)
         {
-            // 0. Створення ролей (Новий блок)
-            string[] roleNames = { "Admin", "Moderator", "User" };
-            foreach (var roleName in roleNames)
+           
+
+            var fakerUk = new Faker("uk"); 
+            var fakerEn = new Faker("en"); 
+
+            // Функції-помічники для генерації українського тексту замість зламаного Lorem
+            string GetUkrSentence() => fakerUk.PickRandom(UkrSentences);
+            string GetUkrParagraph(int count = 3) => string.Join(" ", Enumerable.Range(0, count).Select(_ => GetUkrSentence()));
+
+            // =========================================
+            // ROLES
+            // =========================================
+            string[] roles = { "Admin", "Moderator", "User" };
+            foreach (var role in roles)
             {
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
+                if (!await roleManager.RoleExistsAsync(role))
                 {
-                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                    await roleManager.CreateAsync(new IdentityRole(role));
                 }
             }
 
-            // 1. Користувачі
-            var anna = await userManager.FindByNameAsync("anna_shevchenko");
-            if (anna == null)
+            // =========================================
+            // ADMIN
+            // =========================================
+            var admin = new ApplicationUser
             {
-                anna = new ApplicationUser
+                UserName = "admin",
+                Email = "admin@jointhefun.com",
+                EmailConfirmed = true
+            };
+            await userManager.CreateAsync(admin, "Admin123!");
+            await userManager.AddToRoleAsync(admin, "Admin");
+
+            // =========================================
+            // USERS
+            // =========================================
+            var users = new List<ApplicationUser>();
+            for (int i = 0; i < 20; i++)
+            {
+                var username = fakerEn.Internet.UserName()
+                    .Replace(".", "_")
+                    .ToLower();
+
+                var user = new ApplicationUser
                 {
-                    UserName = "anna_shevchenko",
-                    Email = "anna_shevchenko@email.com",
+                    UserName = username,
+                    Email = fakerEn.Internet.Email(username),
                     EmailConfirmed = true
                 };
-                await userManager.CreateAsync(anna, "Anna123!");
-                
-                // Надаємо Анні роль звичайного користувача
-                await userManager.AddToRoleAsync(anna, "User");
-            }
 
-            var oleg = await userManager.FindByNameAsync("oleg_rusnak");
-            if (oleg == null)
-            {
-                oleg = new ApplicationUser
+                var result = await userManager.CreateAsync(user, "User123!");
+                if (result.Succeeded)
                 {
-                    UserName = "oleg_rusnak",
-                    Email = "oleg_rusnak@email.com",
-                    EmailConfirmed = true
-                };
-                await userManager.CreateAsync(oleg, "Oleg123!");
-                
-                // Робимо Олега Адміністратором додатка
-                await userManager.AddToRoleAsync(oleg, "Admin");
-            }
-
-            // 2. Профілі (Твоя існуюча логіка без змін)
-            if (!context.Profiles.Any())
-            {
-                var profileAnna = new Profile
-                {
-                    UserId = anna.Id,
-                    Age = 25,
-                    City = "Львів",
-                    Description = "Люблю фото та каву",
-                    AvatarUrl = Array.Empty<byte>(),
-                    Gender = Gender.Female
-                };
-
-                var profileOleg = new Profile
-                {
-                    UserId = oleg.Id,
-                    Age = 28,
-                    City = "Київ",
-                    Description = "Геймер і турист",
-                    AvatarUrl = Array.Empty<byte>(),
-                    Gender = Gender.Male
-                };
-
-                context.Profiles.AddRange(profileAnna, profileOleg);
-                await context.SaveChangesAsync();
-
-                // 3. Інтереси
-                if (!context.Interests.Any())
-                {
-                    var photo = new Interest { Name = "Фотографія" };
-                    var gaming = new Interest { Name = "Геймінг" };
-                    var tourism = new Interest { Name = "Туризм" };
-
-                    context.Interests.AddRange(photo, gaming, tourism);
-                    await context.SaveChangesAsync();
-
-                    // 4. UserInterests
-                    context.UserInterests.AddRange(
-                        new UserInterest { ProfileId = profileAnna.Id, InterestId = photo.InterestId },
-                        new UserInterest { ProfileId = profileOleg.Id, InterestId = gaming.InterestId },
-                        new UserInterest { ProfileId = profileOleg.Id, InterestId = tourism.InterestId });
-                    await context.SaveChangesAsync();
+                    await userManager.AddToRoleAsync(user, "User");
+                    users.Add(user);
                 }
+            }
+            users.Add(admin);
 
-                // 5. Пости
-                var post1 = new Post
+            // =========================================
+            // INTERESTS
+            // =========================================
+            var interests = new List<Interest>
+            {
+                new() { Name = "Фотографія" },
+                new() { Name = "Геймінг" },
+                new() { Name = "Подорожі" },
+                new() { Name = "Фітнес" },
+                new() { Name = "Програмування" },
+                new() { Name = "Кіно" },
+                new() { Name = "Музика" },
+                new() { Name = "Книги" }
+            };
+            context.Interests.AddRange(interests);
+            await context.SaveChangesAsync();
+
+            // =========================================
+            // PROFILES
+            // =========================================
+            var cities = new[] { "Київ", "Львів", "Чернівці", "Одеса", "Харків", "Дніпро", "Івано-Франківськ", "Тернопіль" };
+            var profiles = new List<Profile>();
+            int avatarIndex = 1;
+
+            foreach (var user in users)
+            {
+                var profile = new Profile
                 {
-                    UserId = anna.Id,
-                    Content = "Крута прогулянка по Карпатах!",
-                    ImageUrl = Array.Empty<byte>(),
-                    CreatedAt = DateTime.UtcNow
+                    UserId = user.Id,
+                    Age = fakerUk.Random.Int(18, 35),
+                    City = fakerUk.PickRandom(cities),
+                    Description = GetUkrSentence(), // Справжнє речення українською
+
+                    AvatarUrl = await GetImageBytesAsync($"https://i.pravatar.cc/300?img={avatarIndex}"),
+                    Gender = fakerUk.PickRandom<Gender>()
                 };
-                var post2 = new Post
+
+                avatarIndex++;
+                profiles.Add(profile);
+            }
+            context.Profiles.AddRange(profiles);
+            await context.SaveChangesAsync();
+
+            // =========================================
+            // USER INTERESTS
+            // =========================================
+            var userInterests = new List<UserInterest>();
+            foreach (var profile in profiles)
+            {
+                var selectedInterests = interests
+                    .OrderBy(x => Guid.NewGuid())
+                    .Take(fakerUk.Random.Int(2, 4))
+                    .ToList();
+
+                foreach (var interest in selectedInterests)
                 {
-                    UserId = oleg.Id,
-                    Content = "Граємо в CS GO — хто з нами?",
-                    ImageUrl = Array.Empty<byte>(),
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                context.Posts.AddRange(post1, post2);
-                await context.SaveChangesAsync();
-
-                // 6. Коментарі
-                context.PostComments.AddRange(
-                    new PostComment
+                    userInterests.Add(new UserInterest
                     {
-                        PostId = post1.PostId,
-                        UserId = oleg.Id,
-                        Content = "Вау! Де саме були?",
-                        CreatedAt = DateTime.UtcNow
-                    },
-                    new PostComment
-                    {
-                        PostId = post2.PostId,
-                        UserId = anna.Id,
-                        Content = "Я з вами!",
-                        CreatedAt = DateTime.UtcNow
+                        ProfileId = profile.Id,
+                        InterestId = interest.InterestId
                     });
-                await context.SaveChangesAsync();
-
-                // 7. Лайки
-                context.PostLikes.AddRange(
-                    new PostLike { PostId = post1.PostId, UserId = oleg.Id },
-                    new PostLike { PostId = post2.PostId, UserId = anna.Id });
-                await context.SaveChangesAsync();
-
-                // 8. Події
-                var photoEvent = new Event
-                {
-                    Title = "Фото-прогулянка у Львові",
-                    Description = "Зустрічаємось біля Оперного",
-                    CreatorId = anna.Id,
-                    Location = "Львів",
-                    StartTime = DateTime.UtcNow.AddDays(5),
-                    ImageUrl = "mmm",
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                context.Events.Add(photoEvent);
-                await context.SaveChangesAsync();
-
-                // 9. Участь
-                context.EventParticipants.AddRange(
-                    new EventParticipant { EventId = photoEvent.EventId, UserId = anna.Id, Status = "going" },
-                    new EventParticipant { EventId = photoEvent.EventId, UserId = oleg.Id, Status = "interested" });
-                await context.SaveChangesAsync();
-
-                // 10. Follow
-                context.Follows.Add(new Follow
-                {
-                    FollowerId = oleg.Id,
-                    FollowedId = anna.Id
-                });
-                await context.SaveChangesAsync();
+                }
             }
+            context.UserInterests.AddRange(userInterests);
+            await context.SaveChangesAsync();
+
+            // =========================================
+            // POSTS
+            // =========================================
+            var posts = new List<Post>();
+            int imageIndex = 1;
+
+            foreach (var user in users)
+            {
+                int count = fakerUk.Random.Int(2, 5);
+                for (int i = 0; i < count; i++)
+                {
+                    byte[] imageBytes = Array.Empty<byte>();
+                    if (fakerUk.Random.Bool(0.6f))
+                    {
+                        imageBytes = await GetImageBytesAsync($"https://picsum.photos/600/400?random={imageIndex}");
+                        imageIndex++;
+                    }
+
+                    posts.Add(new Post
+                    {
+                        UserId = user.Id,
+                        Content = GetUkrParagraph(2), // Параграф українською
+                        ImageUrl = imageBytes,
+                        CreatedAt = fakerUk.Date.Recent(30)
+                    });
+                }
+            }
+            context.Posts.AddRange(posts);
+            await context.SaveChangesAsync();
+
+            // =========================================
+            // COMMENTS
+            // =========================================
+            var comments = new List<PostComment>();
+            foreach (var post in posts)
+            {
+                var randomUsers = users.OrderBy(x => Guid.NewGuid()).Take(fakerUk.Random.Int(1, 5));
+                foreach (var user in randomUsers)
+                {
+                    comments.Add(new PostComment
+                    {
+                        PostId = post.PostId,
+                        UserId = user.Id,
+                        Content = GetUkrSentence(), // Коментар українською
+                        CreatedAt = fakerUk.Date.Recent(20)
+                    });
+                }
+            }
+            context.PostComments.AddRange(comments);
+            await context.SaveChangesAsync();
+
+            // =========================================
+            // LIKES (без змін)
+            // =========================================
+            var likes = new List<PostLike>();
+            foreach (var post in posts)
+            {
+                var likedUsers = users.OrderBy(x => Guid.NewGuid()).Take(fakerUk.Random.Int(1, 10));
+                foreach (var user in likedUsers)
+                {
+                    if (!likes.Any(x => x.PostId == post.PostId && x.UserId == user.Id))
+                    {
+                        likes.Add(new PostLike { PostId = post.PostId, UserId = user.Id });
+                    }
+                }
+            }
+            context.PostLikes.AddRange(likes);
+            await context.SaveChangesAsync();
+
+            // =========================================
+            // EVENTS
+            // =========================================
+            var eventsList = new List<Event>();
+            for (int i = 0; i < 10; i++)
+            {
+                var creator = fakerUk.PickRandom(users);
+
+                eventsList.Add(new Event
+                {
+                    Title = fakerUk.PickRandom(EventTitles), // Гарна українська назва
+                    Description = GetUkrParagraph(3), // Опис події українською
+                    CreatorId = creator.Id,
+                    Location = fakerUk.PickRandom(cities),
+                    StartTime = fakerUk.Date.Soon(30),
+                    CreatedAt = fakerUk.Date.Recent(10),
+                    ImageUrl = $"https://picsum.photos/800/500?random=event{i}"
+                });
+            }
+            context.Events.AddRange(eventsList);
+            await context.SaveChangesAsync();
+
+            // =========================================
+            // EVENT PARTICIPANTS & FOLLOWS (без змін)
+            // =========================================
+            var participants = new List<EventParticipant>();
+            string[] statuses = { "піду", "цікавить" };
+
+            foreach (var ev in eventsList)
+            {
+                var randomUsers = users.OrderBy(x => Guid.NewGuid()).Take(fakerUk.Random.Int(3, 10));
+                foreach (var user in randomUsers)
+                {
+                    participants.Add(new EventParticipant
+                    {
+                        EventId = ev.EventId,
+                        UserId = user.Id,
+                        Status = fakerUk.PickRandom(statuses)
+                    });
+                }
+            }
+            context.EventParticipants.AddRange(participants);
+
+            var follows = new List<Follow>();
+            foreach (var user in users)
+            {
+                var following = users.Where(x => x.Id != user.Id).OrderBy(x => Guid.NewGuid()).Take(fakerUk.Random.Int(2, 7));
+                foreach (var followUser in following)
+                {
+                    if (!follows.Any(x => x.FollowerId == user.Id && x.FollowedId == followUser.Id))
+                    {
+                        follows.Add(new Follow { FollowerId = user.Id, FollowedId = followUser.Id });
+                    }
+                }
+            }
+            context.Follows.AddRange(follows);
+
+            await context.SaveChangesAsync();
+        }
+
+        private static async Task<byte[]> GetImageBytesAsync(string url)
+        {
+            using var httpClient = new HttpClient();
+            try { return await httpClient.GetByteArrayAsync(url); }
+            catch { return Array.Empty<byte>(); }
         }
     }
 }
